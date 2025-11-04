@@ -1,0 +1,21 @@
+{
+  "name": "codewise",
+  "version": "1.0.0",
+  "main": "index.js",
+  "packageManager": "npm@10.0.0",
+   "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+   "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "turbo": "^2.6.0"
+  }
+}
