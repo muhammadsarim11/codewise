@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "packageManager": "npm@10.0.0",
-   "workspaces": [
+  "workspaces": [
     "apps/*",
     "packages/*"
   ],
-   "scripts": {
+  "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build"
   },
@@ -16,6 +16,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "prisma": "^6.18.0",
     "turbo": "^2.6.0"
   }
 }
