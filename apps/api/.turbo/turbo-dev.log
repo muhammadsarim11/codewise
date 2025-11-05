@@ -1,0 +1,14 @@
+
+> api@1.0.0 predev
+> npx prisma generate
+
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Loaded Prisma config from prisma.config.js.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 99ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
