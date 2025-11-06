@@ -72,25 +72,41 @@ export const SignIn = async (req, res) => {
             });
         }
 
-        // 4. Generate Token
-        const token = await generateToken(
-            { id: user.id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
+       const accessToken = generateToken(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-        // 5. Send Response (excluding password)
-        const { password: _, ...userWithoutPassword } = user;
-        
-        return res.status(200).json({
-            success: true,
-            data: {
-                user: userWithoutPassword,
-                token
-            }
-        });
+    const refreshToken = generateToken(
+      { id: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    } catch (error) {
+    // Optional: Store refresh token in DB (good for security)
+    await prisma.User.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
+
+    // 🧈 Send refresh token as httpOnly cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res.status(200).json({
+      message: "Login successful",
+      user: userWithoutPassword,
+      accessToken,
+    });
+  }
+   catch (error) {
         console.error('SignIn Error:', error);
         return res.status(500).json({
             success: false,

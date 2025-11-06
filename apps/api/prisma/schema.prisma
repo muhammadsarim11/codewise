@@ -22,6 +22,7 @@ model User {
   password     String?
   provider     String?
   providerId   String?  
+  refreshToken String?
   bio          String?
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
