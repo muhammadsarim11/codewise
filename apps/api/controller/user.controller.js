@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../utility/jwt.js";
+import { sendEmail } from "../services/nodemailer.js";
 
 export const SignUp = async (req, res) => {
   try {
@@ -10,7 +11,7 @@ export const SignUp = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-  
+
     const [existingUser, hashedPassword] = await Promise.all([
       prisma.User.findUnique({ where: { email } }),
       bcrypt.hash(password, 8),
@@ -22,7 +23,7 @@ export const SignUp = async (req, res) => {
 
     const user = await prisma.User.create({
       data: { name, email, bio, password: hashedPassword },
-      select: { id: true, name: true, email: true, bio: true, createdAt: true }, 
+      select: { id: true, name: true, email: true, bio: true, createdAt: true },
     });
 
     return res.status(201).json({ message: "User created successfully", user });
@@ -33,46 +34,46 @@ export const SignUp = async (req, res) => {
 };
 
 export const SignIn = async (req, res) => {
-    try {
-        // 1. Input Validation
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: "Email and password are required"
-            });
-        }
+  try {
+    // 1. Input Validation
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Email and password are required"
+      });
+    }
 
-        // 2. Find User (with selected fields only)
-        const user = await prisma.User.findUnique({
-            where: { email },
-            select: {
-                id: true,
-                email: true,
-                password: true, // needed for comparison
-                name: true,
-                bio: true,
-                role: true
-            }
-        });
+    // 2. Find User (with selected fields only)
+    const user = await prisma.User.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true, // needed for comparison
+        name: true,
+        bio: true,
+        role: true
+      }
+    });
 
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                error: "Invalid credentials"
-            });
-        }
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid credentials"
+      });
+    }
 
-        // 3. Verify Password
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            return res.status(401).json({
-                success: false,
-                error: "Invalid credentials"
-            });
-        }
+    // 3. Verify Password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid credentials"
+      });
+    }
 
-       const accessToken = generateToken(
+    const accessToken = generateToken(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
@@ -106,11 +107,112 @@ export const SignIn = async (req, res) => {
       accessToken,
     });
   }
-   catch (error) {
-        console.error('SignIn Error:', error);
-        return res.status(500).json({
-            success: false,
-            error: "An error occurred during sign in"
-        });
-    }
+  catch (error) {
+    console.error('SignIn Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: "An error occurred during sign in"
+    });
+  }
 };
+
+
+
+export const forgotPassword = async (req, res) => {
+
+  try {
+    const { email } = req.body
+    if (!email) {
+      return res.status(404).json({
+        message: "email is required!"
+      })
+    }
+
+    const user = await prisma.User.findUnique({
+      where: {
+        email
+      }
+    })
+
+    if (!user) {
+      return res.status(404).json({
+        message: "invalid email"
+      })
+    }
+
+    // generate otp
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await prisma.User.update({
+      where: { email },
+      data: { otpCode: otp, otpExpiry: expiry },
+    });
+
+
+    await sendEmail(
+      email,
+      "Password Reset OTP",
+      `Your OTP code is ${otp}. It will expire in 10 minutes.`
+    );
+
+
+    return res.status(200).json({
+      message: "message succesfully sent"
+    })
+
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message
+    })
+  }
+}
+
+
+
+export const resetPassword = async (req, res) => {
+
+  try {
+    const { email, otp, newpassword } = req.body
+
+    if (!(email && otp && newpassword)) {
+      return res.status(404).json({
+        message: "all fields are required"
+      })
+
+
+    }
+    const user = await prisma.User.findFirst({
+      where: {
+        email,
+        otpCode: otp,
+        otpExpiry: { gt: new Date() }, // OTP not expired
+      },
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: "invalid otp or otp expired"
+      })
+    }
+    const hashed = await bcrypt.hash(newpassword, 8);
+
+    // Update password and clear OTP fields
+    await prisma.User.update({
+      where: { id: user.id },
+      data: {
+        password: hashed,
+        otpCode: null,
+        otpExpiry: null,
+      },
+    });
+    return res.status(200).json({
+      message: "password reset successful"
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: "internal server error"
+    })
+  }
+
+}
