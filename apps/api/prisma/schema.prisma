@@ -24,6 +24,8 @@ model User {
   providerId   String?  
   refreshToken String?
   bio          String?
+  otpCode        String?      
+  otpExpiry      DateTime?     
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
