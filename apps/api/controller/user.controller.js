@@ -127,39 +127,26 @@ export const forgotPassword = async (req, res) => {
         message: "email is required!"
       })
     }
-
-    const user = await prisma.User.findUnique({
-      where: {
-        email
-      }
-    })
-
-    if (!user) {
-      return res.status(404).json({
-        message: "invalid email"
-      })
-    }
-
-    // generate otp
-
+    // generate otp and expiry
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    await prisma.User.update({
+    // Use a single DB operation: updateMany will update if user exists and return count
+    // We intentionally do not reveal whether the email exists — always return a generic response
+    await prisma.User.updateMany({
       where: { email },
       data: { otpCode: otp, otpExpiry: expiry },
     });
 
-
-    await sendEmail(
+    // send email asynchronously; do not leak email send errors to the client
+    sendEmail(
       email,
       "Password Reset OTP",
       `Your OTP code is ${otp}. It will expire in 10 minutes.`
-    );
-
+    ).catch((err) => console.error('Failed to send password reset email:', err));
 
     return res.status(200).json({
-      message: "message succesfully sent"
+      message: "If an account with that email exists, a password reset OTP has been sent."
     })
 
   } catch (error) {
@@ -183,32 +170,30 @@ export const resetPassword = async (req, res) => {
 
 
     }
-    const user = await prisma.User.findFirst({
+    // Hash new password first (do CPU work before DB op)
+    const hashed = await bcrypt.hash(newpassword, 8);
+
+    // Perform verification + update in a single DB call to reduce roundtrips.
+    // updateMany will update if there's a matching user (email + otp + not expired).
+    const result = await prisma.User.updateMany({
       where: {
         email,
         otpCode: otp,
-        otpExpiry: { gt: new Date() }, // OTP not expired
+        otpExpiry: { gt: new Date() },
       },
-    });
-    if (!user) {
-      return res.status(400).json({
-        message: "invalid otp or otp expired"
-      })
-    }
-    const hashed = await bcrypt.hash(newpassword, 8);
-
-    // Update password and clear OTP fields
-    await prisma.User.update({
-      where: { id: user.id },
       data: {
         password: hashed,
         otpCode: null,
         otpExpiry: null,
+        refreshToken: null, // optionally invalidate refresh tokens
       },
     });
-    return res.status(200).json({
-      message: "password reset successful"
-    })
+
+    if (result.count === 0) {
+      return res.status(400).json({ message: "invalid otp or otp expired" });
+    }
+
+    return res.status(200).json({ message: "password reset successful" });
   } catch (error) {
     return res.status(500).json({
       message: "internal server error"

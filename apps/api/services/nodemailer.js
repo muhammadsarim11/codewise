@@ -10,7 +10,7 @@ export const sendEmail = async (to, subject, text) => {
   });
 
   await transporter.sendMail({
-    from: `"Project Forge" <${process.env.EMAIL_USER}>`,
+    from: `"codewise" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     text,
