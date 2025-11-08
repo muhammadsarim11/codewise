@@ -1,4 +1,5 @@
-import express from 'express'
+import express from 'express';
+import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import userRoutes from './router/User.routes.js';
 const app = express();

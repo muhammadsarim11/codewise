@@ -91,8 +91,8 @@ export const SignIn = async (req, res) => {
       data: { refreshToken },
     });
 
-    // 🧈 Send refresh token as httpOnly cookie
-    res.cookie("refreshToken", refreshToken, {
+    // 🧈 Send access token as httpOnly cookie
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
@@ -131,8 +131,7 @@ export const forgotPassword = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Use a single DB operation: updateMany will update if user exists and return count
-    // We intentionally do not reveal whether the email exists — always return a generic response
+    
     await prisma.User.updateMany({
       where: { email },
       data: { otpCode: otp, otpExpiry: expiry },
@@ -170,11 +169,10 @@ export const resetPassword = async (req, res) => {
 
 
     }
-    // Hash new password first (do CPU work before DB op)
+ 
     const hashed = await bcrypt.hash(newpassword, 8);
 
-    // Perform verification + update in a single DB call to reduce roundtrips.
-    // updateMany will update if there's a matching user (email + otp + not expired).
+  
     const result = await prisma.User.updateMany({
       where: {
         email,
@@ -185,7 +183,7 @@ export const resetPassword = async (req, res) => {
         password: hashed,
         otpCode: null,
         otpExpiry: null,
-        refreshToken: null, // optionally invalidate refresh tokens
+        refreshToken: null, 
       },
     });
 
