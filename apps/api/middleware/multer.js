@@ -44,11 +44,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadSingleFile = multer({
-  storage: storage,        // Use memory storage
+// Use multer with .any() to parse all fields including text fields
+export const uploadMiddleware = multer({
+  storage: storage,
   limits: {
-    fileSize: 200 * 1024,  // 200KB limit - enough for code files
-    files: 1               // Maximum 1 file per request
+    fileSize: 200 * 1024,
+    files: 1
   },
-  fileFilter: fileFilter   // Use our file filter
-});
+  fileFilter: fileFilter
+}).any(); // This parses bo
