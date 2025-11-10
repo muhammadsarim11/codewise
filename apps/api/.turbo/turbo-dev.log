@@ -1,0 +1,58 @@
+
+> api@1.0.0 predev
+> npx prisma generate
+
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Loaded Prisma config from prisma.config.js.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+┌─────────────────────────────────────────────────────────┐
+
+│  Update available 6.18.0 -> 6.19.0                      │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 108ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+└─────────────────────────────────────────────────────────┘
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+
+> api@1.0.0 dev
+> node index.js
+
+✅ File Parser Service loaded with 30 supported file types
+✅ All Multer extensions are mapped to languages in Parser
+Server running on port 5000
+Error: Multipart: Boundary not found
+    at new Multipart (C:\Users\Administrator\codewise\node_modules\busboy\lib\types\multipart.js:233:13)
+    at getInstance (C:\Users\Administrator\codewise\node_modules\busboy\lib\index.js:33:12)
+    at module.exports (C:\Users\Administrator\codewise\node_modules\busboy\lib\index.js:56:10)
+    at multerMiddleware (C:\Users\Administrator\codewise\node_modules\multer\lib\make-middleware.js:38:16)
+    at Layer.handleRequest (C:\Users\Administrator\codewise\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\Administrator\codewise\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\Administrator\codewise\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\Administrator\codewise\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\Administrator\codewise\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\Administrator\codewise\node_modules\router\index.js:295:15
+Error: Multipart: Boundary not found
+    at new Multipart (C:\Users\Administrator\codewise\node_modules\busboy\lib\types\multipart.js:233:13)
+    at getInstance (C:\Users\Administrator\codewise\node_modules\busboy\lib\index.js:33:12)
+    at module.exports (C:\Users\Administrator\codewise\node_modules\busboy\lib\index.js:56:10)
+    at multerMiddleware (C:\Users\Administrator\codewise\node_modules\multer\lib\make-middleware.js:38:16)
+    at Layer.handleRequest (C:\Users\Administrator\codewise\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\Administrator\codewise\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\Administrator\codewise\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\Administrator\codewise\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\Administrator\codewise\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\Administrator\codewise\node_modules\router\index.js:295:15
+Raw AI response: ```json
+{
+    "commentedCode": "function fibonacci(n) { // Defines a function named fibonacci that takes an integer n as input.\n    if (n <= 1) return n; // Base case: If n is 0 or 1, return n itself...
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+Checking file: index.js, extension: .js
+Raw AI response: ```json
+{
