@@ -3,28 +3,15 @@ import { parseRawCodeInput } from "../services/file.parser.js";
 import prisma from "../config/prisma.js"
 import { generateCodeExplanation } from "../services/ai.service.js";
 
-const generateDummyExplanation = (code, language) => {
-  const lines = code.split('\n');
-  const commentedCode = lines.map((line, index) => {
-    if (line.trim() === '') return line;
-    return `${line} // Line ${index + 1}`;
-  }).join('\n');
-
-  return {
-    commentedCode,
-    explanationText: `This ${language} code has ${lines.length} lines.`,
-    tokensUsed: 150
-  };
-};
 
 export const createExplanation = async (req, res) => {
   try {
     let parsedCode;
     
-    // FIX: Handle both file upload and form fields properly
+    
     let projectId = req.body?.projectId;
     
-    // Check for file upload (Multer puts files in req.files when using .any())
+    //
     if (req.files && req.files.length > 0) {
       const file = req.files.find(f => f.fieldname === 'file');
       if (file) {
@@ -52,7 +39,7 @@ export const createExplanation = async (req, res) => {
     }
 
     let explanationResult;
-    let aiModel = "dummy-v1";
+    let aiModel ;
 
     if (process.env.GEMINI_API_KEY) {
       try {
@@ -64,13 +51,10 @@ export const createExplanation = async (req, res) => {
         aiModel = "gemini-2.5-flash";
       } catch (aiError) {
         console.log('AI failed, using dummy:', aiError.message);
-        explanationResult = generateDummyExplanation(parCode.code, parsedCode.language);
+       
       }
-    } else {
-      explanationResult = generateDummyExplanation(parsedCode.code, parsedCode.language);
-    }
-
-    // FIX: Use correct Prisma model names (capitalized)
+    } 
+   
     if (!projectId) {
       const defaultProject = await prisma.Project.create({
         data: {
@@ -91,35 +75,18 @@ export const createExplanation = async (req, res) => {
         commentedCode: explanationResult.commentedCode,
         explanationText: explanationResult.explanationText,
         tokensUsed: explanationResult.tokensUsed,
-        aiModel: aiModel
+        aiModel: aiModel,
+        keyPoints: explanationResult.keyPoints || null,
+        complexity: explanationResult.complexity || null,
+        improvements: explanationResult.improvements || null,
       }
     });
 
-    const responseData = {
-      id: explanationRecord.id,
-      explanation: explanationResult.explanationText,
-      code: {
-        original: parsedCode.code,
-        commented: explanationResult.commentedCode
-      },
-      projectId: projectId,
-      aiModel: aiModel,
-      tokensUsed: explanationResult.tokensUsed
-    };
-
-    if (explanationResult.keyPoints) {
-      responseData.keyPoints = explanationResult.keyPoints;
-    }
-    if (explanationResult.complexity) {
-      responseData.complexity = explanationResult.complexity;
-    }
-    if (explanationResult.improvements) {
-      responseData.improvements = explanationResult.improvements;
-    }
+ 
 
     return res.status(201).json({
       success: true,
-      data: responseData
+      data: explanationRecord
     });
 
   } catch (error) {

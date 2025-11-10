@@ -56,6 +56,9 @@ model CodeExplanation {
   explanationText  String
   tokensUsed       Int?
   aiModel          String?
+  keyPoints        String[]
+  complexity       String?
+  improvements     String[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
