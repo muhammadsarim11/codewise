@@ -23,3 +23,16 @@ export const forgotPasswordRateLimiter = rateLimit({
 })  
 
 
+export const explanationLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 10,
+    keyGenerator: (req) => {
+        return req.user.id; // Assume user is always authenticated
+    },
+    message: {
+        success: false,
+        message: 'Too many explanation requests. Please try again after 10 minutes.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});

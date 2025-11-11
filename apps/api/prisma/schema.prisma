@@ -14,53 +14,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String?
-  email        String   @unique
+  email        String    @unique
   password     String?
   provider     String?
-  providerId   String?  
+  providerId   String?
   refreshToken String?
   bio          String?
-  otpCode        String?      
-  otpExpiry      DateTime? 
-  projects     Project[]    
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  otpCode      String?
+  otpExpiry    DateTime?
+  projects     Project[]
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Project {
-  id String @id @default(uuid())
-  name String
+  id          String            @id @default(uuid())
+  name        String
   description String?
-  userId String
-  user User @relation(fields: [userId],references: [id])
-  files CodeExplanation[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  files       CodeExplanation[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
-
 model CodeExplanation {
-  id               String   @id @default(cuid())
-  project          Project? @relation(fields: [projectId], references: [id])  // Make optional
-  projectId        String?  // Make optional first
-  fileName         String?
-  language         String
-  originalCode     String
-  commentedCode    String
-  explanationText  String
-  tokensUsed       Int?
-  aiModel          String?
-  keyPoints        String[]
-  complexity       String?
-  improvements     String[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id            String   @id @default(cuid())
+  project       Project? @relation(fields: [projectId], references: [id])
+  projectId     String?
+  fileName      String?
+  language      String
+  originalCode  String
+  commentedCode String
+
+  explanationDoc Json // Replaced with a 'Json' type for the object
+
+  tokensUsed   Int?
+  aiModel      String?
+  keyPoints    String[]
+  complexity   String?
+  improvements String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 enum Role {

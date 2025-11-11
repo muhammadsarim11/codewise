@@ -2,101 +2,116 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Define the structured schema for our documentation
+// This is the "blueprint" we force the AI to follow.
+// In services/ai.service.js
+
+const CodeExplanationSchema = {
+  type: "OBJECT",
+  properties: {
+    commentedCode: { 
+      type: "STRING",
+      description: "The original code with concise, helpful inline comments added."
+    },
+    explanationDoc: {
+      type: "OBJECT",
+      description: "A comprehensive, documentation-style explanation of the code.",
+      properties: {
+        overview: {
+          type: "STRING",
+          // We are now giving the AI a hard constraint
+          description: "A high-level summary. **IMPORTANT: Be concise, 1-2 sentences MAX.**"
+        },
+        logicFlow: {
+          type: "STRING",
+          // Asking for bullets is more token-efficient than prose
+          description: "A **bulleted list** of the step-by-step logic. **Be brief.**"
+        },
+        functionBreakdown: {
+          type: "STRING",
+          // We are limiting the scope of its analysis
+          description: "A breakdown of **ONLY the 2-3 most important functions/classes**. Explain parameters & return value. Be concise."
+        },
+        usageExample: {
+          type: "STRING",
+          // We are limiting the size of the example
+          description: "A **single, brief** code snippet (under 10 lines) showing how to use this code."
+        }
+      },
+      required: ["overview", "logicFlow", "functionBreakdown", "usageExample"]
+    },
+    keyPoints: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      // Limiting the number of points
+      description: "A list of **exactly 3** bullet-point takeaways about the code."
+    },
+    complexity: { 
+      type: "STRING",
+      description: "A brief analysis of Time and Space Complexity (e.g., 'Time: O(n), Space: O(1)')"
+    },
+    improvements: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      // Limiting the number of suggestions
+      description: "A list of the **top 1-2** actionable suggestions for improving the code."
+    }
+  },
+  required: ["commentedCode", "explanationDoc", "keyPoints", "complexity", "improvements"]
+};
+
+// Configure the model to USE our schema and JSON mode
 const model = genAI.getGenerativeModel({ 
     model: "gemini-2.5-flash",
     generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-    }
+        temperature: 0.5,
+        maxOutputTokens: 8192, 
+        responseMimeType: "application/json",
+        responseSchema: CodeExplanationSchema 
+        }
 });
 
-function extractJSONFromText(text) {
-    try {
-        // Try to parse the entire response as JSON first
-        return JSON.parse(text);
-    } catch (firstError) {
-        try {
-            // If that fails, try to extract JSON from code blocks
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
-        } catch (secondError) {
-            // If extraction fails, create a fallback response
-            console.log('Failed to parse JSON, using fallback');
-            return null;
-        }
-    }
-    return null;
-}
-
 export const generateCodeExplanation = async (code, language, fileName) => {
+    
     const prompt = `
-Analyze this ${language} code and provide a code explanation in JSON format.
+      Analyze the following ${language} code from the file "${fileName}".
+      Provide a comprehensive analysis based on the defined JSON schema.
+      The 'commentedCode' must be the full original code with added comments.
+      The 'explanationDoc' sections must be detailed and high-quality.
+      The 'usageExample' must be a valid, runnable code snippet.
 
-Code from ${fileName}:
-\`\`\`${language}
-${code}
-\`\`\`
-
-Respond with ONLY valid JSON in this exact format:
-{
-    "commentedCode": "code with line comments added",
-    "explanation": "detailed explanation text", 
-    "keyPoints": ["point1", "point2", "point3"],
-    "complexity": "time/space complexity",
-    "improvements": ["suggestion1", "suggestion2"]
-}
-
-Important: Return ONLY the JSON, no other text.
-`;
+      Code:
+      ---
+      ${code}
+      ---
+    `;
 
     try {
         const result = await model.generateContent(prompt);
         const response = await result.response;
+        
+        // This is now a *guaranteed* valid JSON string
         const text = response.text();
         
-        console.log('Raw AI response:', text.substring(0, 200) + '...');
-        
-        const explanation = extractJSONFromText(text);
-        
+        let explanation;
+        try {
+            explanation = JSON.parse(text);
+        } catch (parseError) {
+             console.error('Failed to parse the guaranteed JSON response:', parseError, text);
+             throw new Error('AI returned an invalid JSON structure despite JSON mode.');
+        }
+       
         const tokensUsed = response.usageMetadata ? response.usageMetadata.totalTokenCount : 150;
 
-        // FIX: Handle case where explanation is null/undefined
         if (!explanation) {
-            console.log('No valid JSON found in response, using fallback');
-            return {
-                commentedCode: code,
-                explanationText: "AI analysis completed but response format was invalid",
-                keyPoints: ["Code analyzed by AI"],
-                complexity: "Not specified",
-                improvements: ["Review the code structure"],
-                tokensUsed: tokensUsed
-            };
+            throw new Error('AI analysis returned an empty response.');
         }
 
-        // Fix for the JSON issue in the response
-        let cleanCommentedCode = explanation.commentedCode || code;
-        
-        // If commentedCode contains the entire JSON response, extract just the code part
-        if (cleanCommentedCode && cleanCommentedCode.includes('```json') && cleanCommentedCode.includes('commentedCode')) {
-            try {
-                const jsonMatch = cleanCommentedCode.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    const parsedResponse = JSON.parse(jsonMatch[0]);
-                    cleanCommentedCode = parsedResponse.commentedCode || code;
-                }
-            } catch (e) {
-                // If extraction fails, use original code
-                cleanCommentedCode = code;
-            }
-        }
-
+        // Return the structured object
         return {
-            commentedCode: cleanCommentedCode,
-            explanationText: explanation.explanation || "AI explanation generated",
+            commentedCode: explanation.commentedCode || code,
+            // Pass the whole explanationDoc object
+            explanationDoc: explanation.explanationDoc || { overview: "No overview generated.", logicFlow: "", functionBreakdown: "", usageExample: "" }, 
             keyPoints: explanation.keyPoints || ["Code analyzed"],
             complexity: explanation.complexity || "Not specified",
             improvements: explanation.improvements || ["Review code structure"],
