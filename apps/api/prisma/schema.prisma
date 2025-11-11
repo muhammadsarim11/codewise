@@ -52,6 +52,8 @@ model CodeExplanation {
   commentedCode String
 
   explanationDoc Json // Replaced with a 'Json' type for the object
+isPublic        Boolean  @default(false)
+  publicShareId   String?   @default(cuid()) @unique
 
   tokensUsed   Int?
   aiModel      String?

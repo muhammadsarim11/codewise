@@ -2,13 +2,175 @@
 > api@1.0.0 predev
 > npx prisma generate
 
-[dotenv@17.2.3] injecting env (7) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
 Loaded Prisma config from prisma.config.js.
 
 Prisma config detected, skipping environment variable loading.
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 119ms
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 554ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+
+> api@1.0.0 dev
+> node index.js
+
+✅ File Parser Service loaded with 30 supported file types
+✅ All Multer extensions are mapped to languages in Parser
+Server running on port 5000
+Connected to Redis!
+Checking file: index.js, extension: .js
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+Redis connection error: Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Redis connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: connect ETIMEDOUT
+    at Socket.<anonymous> (C:\Users\Administrator\codewise\node_modules\ioredis\built\Redis.js:171:41)
+    at Object.onceWrapper (node:events:632:28)
+    at Socket.emit (node:events:518:28)
+    at Socket._onTimeout (node:net:609:8)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7) {
+  errorno: 'ETIMEDOUT',
+  code: 'ETIMEDOUT',
+  syscall: 'connect'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}
+Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+}

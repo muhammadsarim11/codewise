@@ -5,11 +5,6 @@ import { generateCodeExplanation } from "../services/ai.service.js";
 import { CacheService } from "../services/cache.service.js";
 
 
-import { parseUploadedFile } from "../services/file.parser.js";
-import { parseRawCodeInput } from "../services/file.parser.js";
-import prisma from "../config/prisma.js"
-import { generateCodeExplanation } from "../services/ai.service.js";
-import { CacheService } from "../services/cache.service.js";
 
 const MAX_CODE_LENGTH = 100000;
 
@@ -186,4 +181,94 @@ return res.status(400).json({
 
   })
   }
+}
+
+
+export const shareExplanation = async (req,res)=>{
+  const {id} = req.params
+ const UserId = req.user.id
+
+try {
+    const codeExplanation = await prisma.CodeExplanation.findFirst({
+    where:{
+        id:id,
+        Project:{
+          userId:UserId
+        }
+    
+    }
+  })
+  
+  if(!codeExplanation){
+    return res.status(404).json({
+      success:false,
+      message:"Explanation not found"
+    })
+  
+  }
+    
+  const updateExplanation = await prisma.codeExplanation.update({
+    where:{
+      id:id
+    },
+    data:{
+      isPublic:true
+    }
+    
+  })
+  
+  
+  return res.status(200).json({
+    success:true,
+    message:"shared successfully",
+    publicShareId : updateExplanation.publicShareId
+  
+  })
+  
+} catch (error) {
+  return res.status(400).json({
+    success:false,
+    message:error.message
+  })
+}
+
+}
+
+
+export const getPublicExplanation = async (req,res)=>{
+  const {publicShareId} = req.params
+try {
+  
+    const codeExplanation = await prisma.CodeExplanation.findUnique({
+      where:{
+        publicShareId:publicShareId
+      }
+    })
+  
+  if(!codeExplanation){
+    return res.status(404).json({
+      success:false,
+      message:"Explanation not found"
+    })
+  
+  }
+  if (!codeExplanation.isPublic) {
+      return res.status(404).json({
+        success: false,
+        message: "Explanation not found" // We give the same error
+      });
+    }
+  return res.status(200).json({
+    success:true,
+    data:codeExplanation
+  })
+  
+} catch (error) {
+  
+  return res.status(400).json({
+    success:false,
+    message:error.message
+  })
+    
+}
 }
