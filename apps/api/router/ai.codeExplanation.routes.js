@@ -11,7 +11,6 @@ const router = express.Router();
 router.post('/explainations',ProtectedRoute, explanationLimiter
     ,uploadMiddleware, createExplanation)
     router.patch("/explainations/:id/share",ProtectedRoute,shareExplanation)
-
     router.get("/share/:shareId",getPublicExplanation)
 router.get("/explainations/:id",ProtectedRoute,getExplanation)
 export default router
