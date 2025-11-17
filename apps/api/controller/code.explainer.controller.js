@@ -192,7 +192,7 @@ try {
     const codeExplanation = await prisma.CodeExplanation.findFirst({
     where:{
         id:id,
-        Project:{
+        project:{
           userId:UserId
         }
     
@@ -236,12 +236,13 @@ try {
 
 
 export const getPublicExplanation = async (req,res)=>{
-  const {publicShareId} = req.params
-try {
+  const shareId = req.params?.shareId
   
+try {
+  console.log(shareId)
     const codeExplanation = await prisma.CodeExplanation.findUnique({
       where:{
-        publicShareId:publicShareId
+        publicShareId:shareId
       }
     })
   
