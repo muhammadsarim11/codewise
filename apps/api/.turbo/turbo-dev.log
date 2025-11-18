@@ -2,13 +2,13 @@
 > api@1.0.0 predev
 > npx prisma generate
 
-[dotenv@17.2.3] injecting env (7) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
 Loaded Prisma config from prisma.config.js.
 
 Prisma config detected, skipping environment variable loading.
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 462ms
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 293ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -18,21 +18,387 @@ Tip: Interested in query caching in just a few lines of code? Try Accelerate tod
 > api@1.0.0 dev
 > concurrently -n "API,WORKER" -c "blue,magenta" "npm run start:api" "npm run start:worker"
 
-[API] 
-[API] > api@1.0.0 start:api
-[API] > node index.js
-[API] 
 [WORKER] 
 [WORKER] > api@1.0.0 start:worker
 [WORKER] > node worker.js
 [WORKER] 
+[API] 
+[API] > api@1.0.0 start:api
+[API] > node index.js
+[API] 
 [WORKER] 📍 Current Directory: C:\Users\Administrator\codewise\apps\api
 [WORKER] 🔑 GEMINI_API_KEY: LOADED ✅
 [WORKER] 👷 Worker is starting... Listening for "explanation-jobs" on Redis...
 [API] ✅ File Parser Service loaded with 30 supported file types
 [API] ✅ All Multer extensions are mapped to languages in Parser
-[WORKER] 🚀 Worker is ready and connected!
 [API] Server running on port 5000
-[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
-[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[API] Redis connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3001,
+[API]   code: 'EAI_AGAIN',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3001,
+[WORKER]   code: 'EAI_AGAIN',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3001,
+[API]   code: 'EAI_AGAIN',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo EAI_AGAIN redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3001,
+[WORKER]   code: 'EAI_AGAIN',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Redis connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
+[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[WORKER]   errno: -3008,
+[WORKER]   code: 'ENOTFOUND',
+[WORKER]   syscall: 'getaddrinfo',
+[WORKER]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[WORKER] }
+[API] Error: getaddrinfo ENOTFOUND redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com
+[API]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+[API]   errno: -3008,
+[API]   code: 'ENOTFOUND',
+[API]   syscall: 'getaddrinfo',
+[API]   hostname: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com'
+[API] }
 [API] Connected to Redis!
+[WORKER] 🚀 Worker is ready and connected!
+[API] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[API] Checking file: index.ts, extension: .ts

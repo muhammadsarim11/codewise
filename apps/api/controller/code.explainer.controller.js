@@ -88,6 +88,14 @@ const projectTask = (async () => {
       code: parsedCode.code,                
       language: parsedCode.language,
       fileName: parsedCode.fileName
+    },{
+      
+ 
+  attempts: 3, 
+  backoff: {
+    type: 'exponential',
+    delay: 5000
+  }
     });
 
 

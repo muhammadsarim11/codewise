@@ -64,7 +64,6 @@ const worker = new Worker('explanation-jobs', async (job) => {
       }
     });
 
-    // Throw the error so BullMQ knows this job failed
     throw error;
   }
 
