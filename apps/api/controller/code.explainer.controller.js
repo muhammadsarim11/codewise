@@ -104,15 +104,12 @@ const projectTask = (async () => {
     });
   }
 };
-
 export const getExplanation = async (req, res) => {
-
-  const { id } = req.params
+  const { id } = req.params;
   try {
 
-    // checking if cached already!
-    const cachedData = CacheService.get(id)
-
+    // 1. Check Cache
+    const cachedData = CacheService.get(id);
     if (cachedData) {
       return res.json({
         success: true,
@@ -121,9 +118,8 @@ export const getExplanation = async (req, res) => {
       });
     }
 
-
+    // 2. Fetch from DB
     const codeExplanation = await prisma.CodeExplanation.findFirst({
-
       where: {
         id: id,
         Project: {
@@ -138,34 +134,33 @@ export const getExplanation = async (req, res) => {
           }
         }
       }
-    })
+    });
 
-     if (!codeExplanation) {
-            return res.status(404).json({
-                success: false,
-                message: "Explanation not found"
-            });
-        }
+    if (!codeExplanation) {
+      return res.status(404).json({
+        success: false,
+        message: "Explanation not found"
+      });
+    }
 
-    await CacheService.set(codeExplanation.id, codeExplanation)
+  
+    if (codeExplanation.status === 'COMPLETED') {
+        CacheService.set(codeExplanation.id, codeExplanation);
+    }
+
     return res.status(200).json({
       success: true,
-      data: codeExplanation,
+      data: codeExplanation, 
       cached: false
+    });
 
-    
-
-  })
-  } 
-  
-  catch (error) {
-return res.status(400).json({
-  success: false,
-  message:error.message
-
-  })
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
   }
-}
+};
 
 
 export const shareExplanation = async (req,res)=>{

@@ -2,17 +2,17 @@
 > api@1.0.0 predev
 > npx prisma generate
 
-[dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (7) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
 Loaded Prisma config from prisma.config.js.
 
 Prisma config detected, skipping environment variable loading.
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 330ms
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 462ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
 
 
 > api@1.0.0 dev
@@ -31,8 +31,8 @@ Tip: Need your database queries to be 1000x faster? Accelerate offers you that a
 [WORKER] 👷 Worker is starting... Listening for "explanation-jobs" on Redis...
 [API] ✅ File Parser Service loaded with 30 supported file types
 [API] ✅ All Multer extensions are mapped to languages in Parser
-[API] Server running on port 5000
 [WORKER] 🚀 Worker is ready and connected!
+[API] Server running on port 5000
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
 [API] Connected to Redis!
-[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
-[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
