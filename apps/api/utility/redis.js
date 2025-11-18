@@ -1,10 +1,12 @@
 import Redis from 'ioredis';
+import { Queue } from 'bullmq'
 
 const redis = new Redis({
   host: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com',
   port:  11450,
-  password: 'C69P1SF0EXmi3UkfVqWAR8N62Hyky8I1',
 
+  password: 'C69P1SF0EXmi3UkfVqWAR8N62Hyky8I1',
+skipConfigValidation: true
 });
 
 redis.on('connect', () => {
@@ -15,5 +17,8 @@ redis.on('error', (err) => {
   console.error('Redis connection error:', err);
 });
 
+export const explanationQueue = new Queue('explanation-jobs', {
+  connection: redis
+});
 
 export default redis;

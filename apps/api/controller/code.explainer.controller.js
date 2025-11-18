@@ -1,13 +1,12 @@
 import { parseUploadedFile } from "../services/file.parser.js";
 import { parseRawCodeInput } from "../services/file.parser.js";
 import prisma from "../config/prisma.js"
-import { generateCodeExplanation } from "../services/ai.service.js";
+import { explanationQueue } from "../utility/redis.js";
 import { CacheService } from "../services/cache.service.js";
 
 
 
 const MAX_CODE_LENGTH = 100000;
-// we have to change this to queue , with bullmq
 export const createExplanation = async (req, res) => {
   try {
     let parsedCode;
@@ -49,30 +48,8 @@ export const createExplanation = async (req, res) => {
         console.warn(`Input code from ${parsedCode.fileName} was truncated. Original size: ${parsedCode.code.length}, New size: ${MAX_CODE_LENGTH}`);
         parsedCode.code = parsedCode.code.substring(0, MAX_CODE_LENGTH);
     }
-
-    const aiTask = (async () => {
-      if (process.env.GEMINI_API_KEY) {
-        try {
-          const explanationResult = await generateCodeExplanation(
-            parsedCode.code,
-            parsedCode.language,
-            parsedCode.fileName
-          );
-        
-          return { result: explanationResult, model: "gemini-2.5-flash" };
-        } catch (aiError) {
-          console.log('AI failed, using dummy:', aiError.message);
-      
-          throw new Error(`AI Generation Failed: ${aiError.message}`);
-        }
-      }
-      throw new Error("AI service is not configured (GEMINI_API_KEY not set).");
-    })();
-
-    const projectTask = (async () => {
-      if (projectId) {
-        return projectId;
-      }
+const projectTask = (async () => {
+      if (projectId) return projectId;
       
       const defaultProject = await prisma.Project.create({
         data: {
@@ -84,33 +61,40 @@ export const createExplanation = async (req, res) => {
       return defaultProject.id; 
     })();
 
-    const [aiData, resolvedProjectId] = await Promise.all([
-      aiTask,
-      projectTask
-    ]);
-
-    const explanationResult = aiData.result;
-    const aiModel = aiData.model;
-    
+    const resolvedProjectId = await projectTask;
     const explanationRecord = await prisma.CodeExplanation.create({
       data: {
         projectId: resolvedProjectId, 
         fileName: parsedCode.fileName,
         language: parsedCode.language,
         originalCode: parsedCode.code,
-        commentedCode: explanationResult.commentedCode,
-        explanationDoc: explanationResult.explanationDoc,
-        tokensUsed: explanationResult.tokensUsed,
-        aiModel: aiModel,
-        keyPoints: explanationResult.keyPoints || null,
-        complexity: explanationResult.complexity || null,
-        improvements: explanationResult.improvements || null,
+        status: "PENDING", 
+        commentedCode: "Your explanation is being generated...",
+        explanationDoc: {
+          overview: "Please wait, your analysis is in the queue.",
+          logicFlow: "...",
+          functionBreakdown: "...",
+          usageExample: "..."
+        },
+        keyPoints: ["Processing..."],
+        complexity: "Processing...",
+        improvements: ["Processing..."]
       }
     });
 
-    return res.status(201).json({
+
+    await explanationQueue.add('process-explanation', {
+      explanationId: explanationRecord.id, 
+      code: parsedCode.code,                
+      language: parsedCode.language,
+      fileName: parsedCode.fileName
+    });
+
+
+    return res.status(202).json({
       success: true,
-      data: explanationRecord
+      message: "Explanation job accepted and is being processed.",
+      data: explanationRecord 
     });
 
   } catch (error) {

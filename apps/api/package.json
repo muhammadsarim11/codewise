@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "predev": "npx prisma generate",
-    "dev": "node index.js",
-    "start": "node index.js"
+   "start:api": "node index.js",
+  "start:worker": "node worker.js",
+  "dev": "concurrently -n \"API,WORKER\" -c \"blue,magenta\" \"npm run start:api\" \"npm run start:worker\""
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.0",
     "bcryptjs": "^3.0.3",
+    "bullmq": "^5.63.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -27,5 +29,8 @@
     "nodemon": "^3.1.10",
     "redis": "^5.9.0",
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

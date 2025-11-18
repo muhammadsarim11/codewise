@@ -1,11 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Define the structured schema for our documentation
-// This is the "blueprint" we force the AI to follow.
-// In services/ai.service.js
-
+// Define the structured schema
 const CodeExplanationSchema = {
   type: "OBJECT",
   properties: {
@@ -19,22 +14,18 @@ const CodeExplanationSchema = {
       properties: {
         overview: {
           type: "STRING",
-          // We are now giving the AI a hard constraint
           description: "A high-level summary. **IMPORTANT: Be concise, 1-2 sentences MAX.**"
         },
         logicFlow: {
           type: "STRING",
-          // Asking for bullets is more token-efficient than prose
           description: "A **bulleted list** of the step-by-step logic. **Be brief.**"
         },
         functionBreakdown: {
           type: "STRING",
-          // We are limiting the scope of its analysis
           description: "A breakdown of **ONLY the 2-3 most important functions/classes**. Explain parameters & return value. Be concise."
         },
         usageExample: {
           type: "STRING",
-          // We are limiting the size of the example
           description: "A **single, brief** code snippet (under 10 lines) showing how to use this code."
         }
       },
@@ -43,7 +34,6 @@ const CodeExplanationSchema = {
     keyPoints: {
       type: "ARRAY",
       items: { type: "STRING" },
-      // Limiting the number of points
       description: "A list of **exactly 3** bullet-point takeaways about the code."
     },
     complexity: { 
@@ -53,26 +43,36 @@ const CodeExplanationSchema = {
     improvements: {
       type: "ARRAY",
       items: { type: "STRING" },
-      // Limiting the number of suggestions
       description: "A list of the **top 1-2** actionable suggestions for improving the code."
     }
   },
   required: ["commentedCode", "explanationDoc", "keyPoints", "complexity", "improvements"]
 };
 
-// Configure the model to USE our schema and JSON mode
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig: {
-        temperature: 0.5,
-        maxOutputTokens: 8192, 
-        responseMimeType: "application/json",
-        responseSchema: CodeExplanationSchema 
-        }
-});
+// --- MOVED CLIENT INIT INSIDE THE FUNCTION ---
 
 export const generateCodeExplanation = async (code, language, fileName) => {
     
+    // 1. Check for API Key (This will now run AFTER .env is loaded by the worker)
+    const apiKey = process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+        throw new Error("GEMINI_API_KEY is missing. Make sure your worker loads .env first!");
+    }
+
+    // 2. Initialize the client HERE
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash", // Use the stable model name
+        generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 8192, 
+            responseMimeType: "application/json",
+            responseSchema: CodeExplanationSchema // Use the schema we defined above
+        }
+    });
+
     const prompt = `
       Analyze the following ${language} code from the file "${fileName}".
       Provide a comprehensive analysis based on the defined JSON schema.
@@ -90,7 +90,6 @@ export const generateCodeExplanation = async (code, language, fileName) => {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         
-        // This is now a *guaranteed* valid JSON string
         const text = response.text();
         
         let explanation;
@@ -107,10 +106,8 @@ export const generateCodeExplanation = async (code, language, fileName) => {
             throw new Error('AI analysis returned an empty response.');
         }
 
-        // Return the structured object
         return {
             commentedCode: explanation.commentedCode || code,
-            // Pass the whole explanationDoc object
             explanationDoc: explanation.explanationDoc || { overview: "No overview generated.", logicFlow: "", functionBreakdown: "", usageExample: "" }, 
             keyPoints: explanation.keyPoints || ["Code analyzed"],
             complexity: explanation.complexity || "Not specified",

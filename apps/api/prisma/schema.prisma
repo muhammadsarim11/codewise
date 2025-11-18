@@ -54,7 +54,7 @@ model CodeExplanation {
   explanationDoc Json // Replaced with a 'Json' type for the object
 isPublic        Boolean  @default(false)
   publicShareId   String?   @default(cuid()) @unique
-
+status          String   @default("PENDING")
   tokensUsed   Int?
   aiModel      String?
   keyPoints    String[]

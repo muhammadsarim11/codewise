@@ -1,0 +1,38 @@
+
+> api@1.0.0 predev
+> npx prisma generate
+
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Loaded Prisma config from prisma.config.js.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 330ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+
+> api@1.0.0 dev
+> concurrently -n "API,WORKER" -c "blue,magenta" "npm run start:api" "npm run start:worker"
+
+[API] 
+[API] > api@1.0.0 start:api
+[API] > node index.js
+[API] 
+[WORKER] 
+[WORKER] > api@1.0.0 start:worker
+[WORKER] > node worker.js
+[WORKER] 
+[WORKER] 📍 Current Directory: C:\Users\Administrator\codewise\apps\api
+[WORKER] 🔑 GEMINI_API_KEY: LOADED ✅
+[WORKER] 👷 Worker is starting... Listening for "explanation-jobs" on Redis...
+[API] ✅ File Parser Service loaded with 30 supported file types
+[API] ✅ All Multer extensions are mapped to languages in Parser
+[API] Server running on port 5000
+[WORKER] 🚀 Worker is ready and connected!
+[API] Connected to Redis!
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
