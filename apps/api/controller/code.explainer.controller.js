@@ -96,6 +96,14 @@ const projectTask = (async () => {
     type: 'exponential',
     delay: 5000
   }
+  ,
+  removeOnComplete: {
+      age: 3600, // Keep for 1 hour
+      count: 100 // Keep last 100 jobs max
+  },
+  removeOnFail: {
+      age: 24 * 3600 // Keep failed jobs for 24 hours (for debugging)
+  }
     });
 
 
@@ -118,24 +126,24 @@ export const getExplanation = async (req, res) => {
 
     // 1. Check Cache
     const cachedData = CacheService.get(id);
-    if (cachedData) {
-      return res.json({
-        success: true,
-        data: cachedData,
-        cached: true
-      });
+  if (cachedData && Object.keys(cachedData).length > 0) {
+        return res.json({
+            success: true,
+            data: cachedData,
+            cached: true
+        });
     }
 
     // 2. Fetch from DB
     const codeExplanation = await prisma.CodeExplanation.findFirst({
       where: {
         id: id,
-        Project: {
+        project: {
           userId: req.user.id
         }
       },
       include: {
-        Project: {
+        project: {
           select: {
             name: true,
             id: true

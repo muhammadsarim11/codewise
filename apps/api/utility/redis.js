@@ -2,10 +2,10 @@ import Redis from 'ioredis';
 import { Queue } from 'bullmq'
 
 const redis = new Redis({
-  host: 'redis-11450.crce194.ap-seast-1-1.ec2.redns.redis-cloud.com',
-  port:  11450,
+  host: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com',
+  port:  13299,
 
-  password: 'C69P1SF0EXmi3UkfVqWAR8N62Hyky8I1',
+  password: 'Ly4YUbzyLSFcPfLl20vp2Tcgv2dtwLE0',
 skipConfigValidation: true
 });
 
