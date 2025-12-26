@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "predev": "npx prisma generate",
-   "start:api": "node index.js",
-  "start:worker": "node worker.js",
-  "dev": "concurrently -n \"API,WORKER\" -c \"blue,magenta\" \"npm run start:api\" \"npm run start:worker\""
+    "start:api": "node index.js",
+    "start:worker": "node worker.js",
+    "dev": "concurrently -n \"API,WORKER\" -c \"blue,magenta\" \"npm run start:api\" \"npm run start:worker\""
   },
   "keywords": [],
   "author": "",
