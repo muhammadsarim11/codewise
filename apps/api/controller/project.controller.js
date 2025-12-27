@@ -76,7 +76,7 @@ export const DeleteProject = async (req,res)=>{
     try {   
         const project = await prisma.Project.delete({
             where:{
-                id:parseInt(id)
+                id: id
             }
               })
             return res.status(200).json({   

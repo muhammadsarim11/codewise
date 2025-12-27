@@ -268,3 +268,25 @@ try {
     
 }
 }
+
+// Add this new controller function
+export const getAllExplanations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // We fetch ALL explanations for this user
+    const explanations = await prisma.CodeExplanation.findMany({
+      where: { 
+        project: { userId: userId } // Only fetch what belongs to the user
+      },
+      orderBy: { createdAt: 'desc' },
+      include: { project: true } // Include project name if needed
+    });
+
+    return res.status(200).json({
+      success: true,
+      explanations
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
