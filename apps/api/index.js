@@ -11,11 +11,20 @@ const app = express();
 
 
 
+const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://codewise-client.vercel.app'];
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, or server-to-server requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: origin not allowed'));
+    }
+  },
   credentials: true,
-  
-}))
+}));
 
 app.use(bodyParser.json());
 
