@@ -11,7 +11,7 @@ const app = express();
 
 
 
-const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://codewise-client.vercel.app'];
+const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://thecodewise.vercel.app'];
 
 app.use(cors({
   origin: function(origin, callback) {
