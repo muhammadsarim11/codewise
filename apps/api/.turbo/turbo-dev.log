@@ -2,13 +2,13 @@
 > api@1.0.0 predev
 > npx prisma generate
 
-[dotenv@17.2.3] injecting env (9) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (9) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
 Loaded Prisma config from prisma.config.js.
 
 Prisma config detected, skipping environment variable loading.
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 1.35s
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 268ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
@@ -18,119 +18,21 @@ Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
 > api@1.0.0 dev
 > concurrently -n "API,WORKER" -c "blue,magenta" "npm run start:api" "npm run start:worker"
 
-[API] 
-[API] > api@1.0.0 start:api
-[API] > node index.js
-[API] 
 [WORKER] 
 [WORKER] > api@1.0.0 start:worker
 [WORKER] > node worker.js
 [WORKER] 
+[API] 
+[API] > api@1.0.0 start:api
+[API] > node index.js
+[API] 
 [WORKER] 📍 Current Directory: C:\Users\Administrator\codewise\apps\api
 [WORKER] 🔑 GEMINI_API_KEY: LOADED ✅
 [WORKER] 👷 Worker is starting... Listening for "explanation-jobs" on Redis...
 [API] ✅ File Parser Service loaded with 30 supported file types
 [API] ✅ All Multer extensions are mapped to languages in Parser
 [WORKER] 🚀 Worker is ready and connected!
-[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
 [API] Server is running on port 5000
 [WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
+[WORKER] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
 [API] Connected to Redis!
-[API] IMPORTANT! Eviction policy is volatile-lru. It should be "noeviction"
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] 🚀 Worker is ready and connected!
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo EAI_AGAIN redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3001,
-[WORKER]   code: 'EAI_AGAIN',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
-[WORKER] ⚠️ Worker connection error: Error: getaddrinfo ENOTFOUND redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com
-[WORKER]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
-[WORKER]   errno: -3008,
-[WORKER]   code: 'ENOTFOUND',
-[WORKER]   syscall: 'getaddrinfo',
-[WORKER]   hostname: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com'
-[WORKER] }
