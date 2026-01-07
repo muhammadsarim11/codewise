@@ -11,25 +11,22 @@ import cors from 'cors'
 const app = express();
 
 
+
+
+const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://thecodewise.vercel.app'];
+
 app.use(cors({
-  origin: '*',
-  withCredentials: true,
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, or server-to-server requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: origin not allowed'));
+    }
+  },
+  credentials: true,
 }));
-
-// const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://thecodewise.vercel.app'];
-
-// app.use(cors({
-//   origin: function(origin, callback) {
-//     // allow requests with no origin (like mobile apps, curl, or server-to-server requests)
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('CORS policy: origin not allowed'));
-//     }
-//   },
-//   credentials: true,
-// }));
 
 
 
