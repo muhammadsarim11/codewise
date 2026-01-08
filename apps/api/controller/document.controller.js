@@ -105,7 +105,7 @@ const prompt = `
 
     // 4. Call AI (Using flash model for speed)
     const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash", // Flash is faster and cheaper for this task
+        model: "gemini-2.5-flash", // Flash is faster and cheaper for this task
         generationConfig: { responseMimeType: "application/json" } 
     });
     
