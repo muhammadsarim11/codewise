@@ -11,7 +11,7 @@ import cors from 'cors'
 const app = express();
 
 
-
+app.set('trust proxy', 1);
 
 const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000', 'https://thecodewise.vercel.app'];
 
@@ -27,7 +27,6 @@ app.use(cors({
   },
   credentials: true,
 }));
-
 
 
 

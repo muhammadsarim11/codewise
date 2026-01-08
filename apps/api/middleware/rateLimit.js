@@ -36,3 +36,19 @@ export const explanationLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false
 });
+
+
+export const documentationLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes window
+    max: 5, // Limit each user to 5 docs generations per 15 mins
+    keyGenerator: (req) => {
+        // Hum User ID use karenge taake logged-in user track ho
+        return req.user ? req.user.id : req.ip; 
+    },
+    message: {
+        success: false,
+        message: 'You have reached the limit for generating documentation. Please try again after 15 minutes.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});

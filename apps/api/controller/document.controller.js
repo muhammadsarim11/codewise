@@ -1,73 +1,134 @@
 import prisma from "../config/prisma.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// 1. Define the Strict Schema for Documentation
+// Ye ensure karega ke AI hamesha sahi format return kare
+const documentationSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    sections: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          title: { type: SchemaType.STRING },
+          pages: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                id: { type: SchemaType.STRING },
+                title: { type: SchemaType.STRING },
+                slug: { type: SchemaType.STRING },
+                description: { type: SchemaType.STRING }, // Markdown content here
+              },
+              required: ["id", "title", "slug", "description"],
+            },
+          },
+        },
+        required: ["title", "pages"],
+      },
+    },
+  },
+  required: ["sections"],
+};
+
+// 2. Initialize Gemini with Config & Schema
+const getGeminiModel = () => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is missing");
+  }
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  
+  return genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash", // Aapka preferred model
+    generationConfig: {
+        temperature: 0.5, // Thora creative lekin structured
+        maxOutputTokens: 8192, // Long content allowed
+        responseMimeType: "application/json",
+        responseSchema: documentationSchema // Schema locking
+    } 
+  });
+};
+
+// --- RETRY LOGIC (Traffic/Overload Handling) ---
+const generateWithRetry = async (model, prompt, retries = 3, delay = 2000) => {
+  try {
+    return await model.generateContent(prompt);
+  } catch (error) {
+    if (retries > 0 && (error.status === 503 || error.message.includes('overloaded'))) {
+      console.warn(`[AI Overloaded] Retrying in ${delay/1000}s...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return generateWithRetry(model, prompt, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
 
 export const generateProjectDocs = async (req, res) => {
   try {
     const { projectId } = req.params;
     const userId = req.user.id; 
 
-    // 1. Verify Project Ownership & Existence (Fast check)
+    console.log(`[Docs Gen] Starting for Project: ${projectId}`);
+
+    // Auth & Validation
     const projectAuth = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true, userId: true, name: true } // Fetch only needed fields
+      select: { id: true, userId: true, name: true } 
     });
 
     if (!projectAuth || projectAuth.userId !== userId) {
       return res.status(403).json({ message: "Unauthorized access to this project" });
     }
 
-    // 2. Fetch analyzed files (Optimized Selection)
     const explanations = await prisma.codeExplanation.findMany({
       where: { projectId: projectId },
-      select: { 
-        id: true, 
-        fileName: true, 
-        // We only fetch the JSON. We will parse it in memory.
-        explanationDoc: true 
-      } 
+      select: { id: true, fileName: true, explanationDoc: true } 
     });
 
     if (explanations.length === 0) {
-      return res.status(400).json({ message: "No analyzed files found. Please analyze some files first." });
+      return res.status(400).json({ message: "No analyzed files found." });
     }
 
-    // 3. Prepare Context for AI (Token Optimized)
-    // We map over the files and truncate long text to save AI tokens and time.
+    // Context Preparation
     const fileList = explanations.map(ex => {
-      let overview = "No summary available";
-      let logicFlow = "";
-      
+      let overview = "No summary";
       try {
-        // Parse if it's a string, otherwise use directly
-        const doc = typeof ex.explanationDoc === 'string' 
-          ? JSON.parse(ex.explanationDoc) 
-          : ex.explanationDoc;
-          
-        if (doc) {
-          // Truncate to 500 chars max to speed up AI processing
-          overview = doc.overview ? doc.overview.substring(0, 500) : overview;
-          logicFlow = doc.logicFlow ? doc.logicFlow.substring(0, 500) : "";
-        }
-      } catch (e) {
-        console.warn(`Failed to parse doc for file ${ex.id}`);
-      }
-        
-      return `ID: ${ex.id}\nName: ${ex.fileName}\nSummary: ${overview}...\nLogic: ${logicFlow}...\n---`;
+        const doc = typeof ex.explanationDoc === 'string' ? JSON.parse(ex.explanationDoc) : ex.explanationDoc;
+        if (doc?.overview) overview = doc.overview.substring(0, 300);
+      } catch (e) {}
+      return `ID: ${ex.id} | Name: ${ex.fileName} | Summary: ${overview}...`;
     }).join("\n");
-const prompt = `
-      You are a Principal Software Architect.
-      Generate a COMPREHENSIVE, DEEP-DIVE documentation structure.
 
-      PROJECT CONTEXT: ${projectAuth.name}
-      ANALYZED FILES: ${fileList}
+    // Prompt (Ab JSON format sikhane ki zarurat nahi, sirf content pe focus)
+  const prompt = `
+      You are a Senior Technical Writer. 
+      Generate a structured documentation for the project: "${projectAuth.name}".
+      
+      FILES TO ANALYZE:
+      ${fileList}
 
-      YOUR GOAL:
-      Create highly detailed documentation covering Architecture, Logic, Data Flow, and Error Handling.
+      YOUR TASK:
+      Return a JSON object with a detailed 'description' for each file.
 
-      OUTPUT FORMAT (Strict JSON):
+      ⭐⭐ CRITICAL FORMATTING RULES FOR 'description' FIELD ⭐⭐:
+      1. The 'description' must be a valid String containing **Markdown**.
+      2. **SEPARATION IS KEY:** You MUST put a double newline (\\n\\n) before and after every Heading.
+      
+      ❌ BAD FORMAT (Do NOT do this):
+      "### OverviewThis module handles login.### ArchitectureIt uses JWT."
+      
+      ✅ GOOD FORMAT (Do EXACTLY this):
+      "### Overview\\n\\nThis module handles login functionality safely.\\n\\n### Architecture\\n\\nIt utilizes JWT for stateless authentication..."
+
+      3. STRUCTURE:
+         - Start with a clear summary.
+         - Use "### Key Logic" for internal workings.
+         - Use "### Data Flow" for inputs/outputs.
+         - Use Bullet points (- ) for lists.
+
+      OUTPUT JSON STRUCTURE:
       {
         "sections": [
           {
@@ -75,110 +136,77 @@ const prompt = `
             "pages": [
               {
                 "id": "Exact File ID",
-                "title": "Professional Title",
+                "title": "Readable Page Title",
                 "slug": "kebab-case-slug",
-                "description": "MARKDOWN STRING HERE"
+                "description": "MARKDOWN_STRING_HERE"
               }
             ]
           }
         ]
       }
-
-      CRITICAL INSTRUCTIONS FOR 'description':
-      1. The 'description' field MUST be a long string using **Markdown formatting**.
-      2. Use **Bold** for key concepts.
-      3. Use \n\n for line breaks.
-      4. Use bullet points (- ) for lists.
-      5. Cover these points:
-         - **Purpose:** Why does this file exist?
-         - **Key Logic:** How does it work step-by-step?
-         - **Data Flow:** Inputs and Outputs.
-         - **Dependencies:** What other files does it use?
-
-      EXAMPLE DESCRIPTION CONTENT:
-      "This module handles user authentication.\n\n**Key Features:**\n- Validates JWT tokens.\n- Manages session expiry.\n\n**Logic Flow:**\n1. Extracts token from header.\n2. Verifies signature using secret."
-
-      STRICT RULES:
-      - Use EXACT File IDs.
-      - Return ONLY valid JSON.
     `;
-
-    // 4. Call AI (Using flash model for speed)
-    const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash", // Flash is faster and cheaper for this task
-        generationConfig: { responseMimeType: "application/json" } 
-    });
+    // Execute with Retry
+    const model = getGeminiModel();
+    const result = await generateWithRetry(model, prompt);
     
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    
-    // Clean response
-    const cleanJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-    const structure = JSON.parse(cleanJson);
+    // Direct Object access (No need to parse JSON string manually!)
+    // Kyunke responseSchema use kiya hai, result.response.text() already valid JSON string hoga.
+    const structure = JSON.parse(result.response.text());
 
-    // 5. Save to DB (Upsert is optimal here)
+    // Save to DB
     const docs = await prisma.documentation.upsert({
       where: { projectId: projectId },
       update: { 
         structure,
         title: `${projectAuth.name} Documentation`,
-        description: `Auto-generated documentation for ${projectAuth.name}`
+        description: `Auto-generated documentation`
       },
       create: {
         projectId: projectId,
         structure,
         title: `${projectAuth.name} Documentation`,
-        description: `Auto-generated documentation for ${projectAuth.name}`
+        description: `Auto-generated documentation`
       }
     });
 
+    console.log("[Docs Gen] Success");
     res.status(200).json({ success: true, docs });
 
   } catch (error) {
-    console.error("Docs Gen Error:", error);
-    res.status(500).json({ 
-        message: "Failed to generate documentation", 
-        error: error.message 
-    });
+    console.error("[Docs Gen ERROR]:", error);
+    const status = error.status === 503 ? 503 : 500;
+    const msg = error.status === 503 ? "AI Service Overloaded. Please try again." : "Failed to generate docs.";
+    
+    res.status(status).json({ message: msg, error: error.message });
   }
 };
 
+// ... getProjectDocs (Same as before) ...
 export const getProjectDocs = async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const userId = req.user.id;
-
-    // 1. Optimized Check: Check project auth AND fetch doc in parallel if possible, 
-    // but sequential is safer for permission logic. 
-    // We only select needed fields to reduce payload size.
+    // ... (Use previous implementation)
+    try {
+        const { projectId } = req.params;
+        const userId = req.user.id;
     
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { userId: true }
-    });
-
-    if (!project || project.userId !== userId) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    const docs = await prisma.documentation.findUnique({
-      where: { projectId: projectId },
-      select: {
-          id: true,
-          title: true,
-          description: true,
-          structure: true,
-          createdAt: true
+        const project = await prisma.project.findUnique({
+          where: { id: projectId },
+          select: { userId: true }
+        });
+    
+        if (!project || project.userId !== userId) {
+          return res.status(403).json({ message: "Unauthorized" });
+        }
+    
+        const docs = await prisma.documentation.findUnique({
+          where: { projectId: projectId }
+        });
+        
+        if (!docs) {
+          return res.status(404).json({ message: "Documentation not generated yet." });
+        }
+        
+        res.status(200).json({ success: true, docs });
+      } catch (error) {
+        res.status(500).json({ message: error.message });
       }
-    });
-    
-    if (!docs) {
-      return res.status(404).json({ message: "Documentation not generated yet." });
-    }
-    
-    res.status(200).json({ success: true, docs });
-  } catch (error) {
-    console.error("Get Docs Error:", error);
-    res.status(500).json({ message: "Server Error", error: error.message });
-  }
 };
