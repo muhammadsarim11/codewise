@@ -1,3 +1,3 @@
 
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ||  'https://codewise-s80w.onrender.com/';
+export const API_BASE_URL =  'https://codewise-s80w.onrender.com/';
