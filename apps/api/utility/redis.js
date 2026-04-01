@@ -2,10 +2,11 @@
   import { Queue } from 'bullmq'
 
   const redis = new Redis({
-    host: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com',
-    port:  13299,
-
-    password: 'Ly4YUbzyLSFcPfLl20vp2Tcgv2dtwLE0',
+   username: 'default',
+    password: 'po58FG7Huco4FMDUCHIjcVPy8gQorUYD',
+    socket: {
+        host: 'redis-10490.c285.us-west-2-2.ec2.cloud.redislabs.com',
+        port: 10490,},
   skipConfigValidation: true
   });
 
