@@ -5,9 +5,11 @@ import prisma from "./config/prisma.js"; // FIXED: Path (assuming worker is in r
 import 'dotenv/config';
 // 1. Redis Connection
 const connection = new IORedis({
-  host: 'redis-13299.c239.us-east-1-2.ec2.cloud.redislabs.com',
-  port: 13299,
-  password: 'Ly4YUbzyLSFcPfLl20vp2Tcgv2dtwLE0',
+  host: 'redis-10490.c285.us-west-2-2.ec2.cloud.redislabs.com',
+    port: 10490,
+    username: 'default',
+    password: 'po58FG7Huco4FMDUCHIjcVPy8gQorUYD',
+    lazyConnect: true,
   skipConfigValidation: true,
    // ⚠️ TODO: Move this to .env file!
   maxRetriesPerRequest: null
