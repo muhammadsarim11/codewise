@@ -1,0 +1,49 @@
+
+> api@1.0.0 predev
+> npx prisma generate
+
+[dotenv@17.2.3] injecting env (9) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+Loaded Prisma config from prisma.config.js.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.18.0) to .\..\..\node_modules\@prisma\client in 566ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+
+> api@1.0.0 dev
+> concurrently -n "API,WORKER" -c "blue,magenta" "npm run start:api" "npm run start:worker"
+
+[API] 
+[API] > api@1.0.0 start:api
+[API] > node index.js
+[API] 
+[WORKER] 
+[WORKER] > api@1.0.0 start:worker
+[WORKER] > node worker.js
+[WORKER] 
+[WORKER] 📍 Current Directory: C:\Users\Administrator\codewise\apps\api
+[WORKER] 🔑 GEMINI_API_KEY: LOADED ✅
+[WORKER] 👷 Worker is starting... Listening for "explanation-jobs" on Redis...
+[API] ValidationError: Custom keyGenerator appears to use request IP without calling the ipKeyGenerator helper function for IPv6 addresses. This could allow IPv6 users to bypass limits. See https://express-rate-limit.github.io/ERR_ERL_KEY_GEN_IPV6/ for more information.
+[API]     at Object.keyGeneratorIpFallback (file:///C:/Users/Administrator/codewise/node_modules/express-rate-limit/dist/index.mjs:608:13)
+[API]     at wrappedValidations.<computed> [as keyGeneratorIpFallback] (file:///C:/Users/Administrator/codewise/node_modules/express-rate-limit/dist/index.mjs:651:22)
+[API]     at parseOptions (file:///C:/Users/Administrator/codewise/node_modules/express-rate-limit/dist/index.mjs:721:16)
+[API]     at rateLimit (file:///C:/Users/Administrator/codewise/node_modules/express-rate-limit/dist/index.mjs:802:18)
+[API]     at file:///C:/Users/Administrator/codewise/apps/api/middleware/rateLimit.js:41:37
+[API]     at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+[API]     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+[API]     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+[API]   code: 'ERR_ERL_KEY_GEN_IPV6',
+[API]   help: 'https://express-rate-limit.github.io/ERR_ERL_KEY_GEN_IPV6/'
+[API] }
+[API] ✅ File Parser Service loaded with 30 supported file types
+[API] ✅ All Multer extensions are mapped to languages in Parser
+[WORKER] 🚀 Worker is ready and connected!
+[API] Server is running on port 5000
+[API] Connected to Redis!
+[WORKER] ⚡ Processing Job #6 for Explanation ID: cmnt58orv0006k71k0bcfpnlo

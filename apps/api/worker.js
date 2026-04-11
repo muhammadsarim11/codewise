@@ -12,7 +12,9 @@ const connection = new IORedis({
     lazyConnect: true,
   skipConfigValidation: true,
    // ⚠️ TODO: Move this to .env file!
-  maxRetriesPerRequest: null
+  maxRetriesPerRequest: null,
+  family: 0, // 👈 YEH BOHOT ZAROORI HAI: Forces IPv4 instead of IPv6
+  enableReadyCheck: false
 });
 console.log("📍 Current Directory:", process.cwd());
 console.log("🔑 GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "LOADED ✅" : "MISSING ❌");
