@@ -95,7 +95,7 @@ export const SignIn = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none", // frontend and backend are on different domains
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

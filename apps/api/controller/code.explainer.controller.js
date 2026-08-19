@@ -125,7 +125,7 @@ export const getExplanation = async (req, res) => {
   try {
 
     // 1. Check Cache
-    const cachedData = CacheService.get(id);
+    const cachedData = await CacheService.get(id);
   if (cachedData && Object.keys(cachedData).length > 0) {
         return res.json({
             success: true,

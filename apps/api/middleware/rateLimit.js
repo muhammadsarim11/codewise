@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 
 
 export const LoginRateLimiter = rateLimit({
@@ -43,7 +43,7 @@ export const documentationLimiter = rateLimit({
     max: 5, // Limit each user to 5 docs generations per 15 mins
     keyGenerator: (req) => {
         // Hum User ID use karenge taake logged-in user track ho
-        return req.user ? req.user.id : req.ip; 
+        return req.user ? req.user.id : ipKeyGenerator(req.ip);
     },
     message: {
         success: false,

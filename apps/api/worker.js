@@ -1,21 +1,8 @@
 import { Worker } from "bullmq"; // Removed unused 'tryCatch'
-import IORedis from "ioredis";
+import connection from "./utility/redis.js";
 import { generateCodeExplanation } from "./services/ai.service.js";
 import prisma from "./config/prisma.js"; // FIXED: Path (assuming worker is in root)
 import 'dotenv/config';
-// 1. Redis Connection
-const connection = new IORedis({
-  host: 'redis-10490.c285.us-west-2-2.ec2.cloud.redislabs.com',
-    port: 10490,
-    username: 'default',
-    password: 'po58FG7Huco4FMDUCHIjcVPy8gQorUYD',
-    lazyConnect: true,
-  skipConfigValidation: true,
-   // ⚠️ TODO: Move this to .env file!
-  maxRetriesPerRequest: null,
-  family: 0, // 👈 YEH BOHOT ZAROORI HAI: Forces IPv4 instead of IPv6
-  enableReadyCheck: false
-});
 console.log("📍 Current Directory:", process.cwd());
 console.log("🔑 GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "LOADED ✅" : "MISSING ❌");
 console.log('👷 Worker is starting... Listening for "explanation-jobs" on Redis...');
