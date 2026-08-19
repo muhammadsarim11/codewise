@@ -14,12 +14,11 @@ const app = express();
 app.set('trust proxy', 1);
   
 // CLIENT_URL supports a comma-separated list, e.g. "https://thecodewise.vercel.app,http://localhost:3000"
-const defaultOrigins =
-  process.env.NODE_ENV === 'production'
-    ? 'https://thecodewise.vercel.app'
-    : 'http://localhost:3000';
+// Always includes the known dev + prod origins as a floor, regardless of NODE_ENV,
+// so a missing/misconfigured NODE_ENV on the host can't silently lock out the real frontend.
+const knownOrigins = 'http://localhost:3000,https://thecodewise.vercel.app';
 
-const allowedOrigins = (process.env.CLIENT_URL || defaultOrigins)
+const allowedOrigins = `${process.env.CLIENT_URL || ''},${knownOrigins}`
   .split(',')
   .map(origin => origin.trim().replace(/\/$/, ''))
   .filter(Boolean);
