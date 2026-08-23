@@ -15,6 +15,11 @@ const worker = new Worker('explanation-jobs', async (job) => {
   const { explanationId, code, language, fileName } = job.data;
 
   try {
+    await prisma.CodeExplanation.update({
+      where: { id: explanationId },
+      data: { status: 'PROCESSING' }
+    });
+
     // 2. The Slow AI Work
     const explanationResult = await generateCodeExplanation(
       code,
