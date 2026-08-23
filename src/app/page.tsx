@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { API_BASE_URL } from './utils/api';
-import dynamic from 'next/dynamic'; 
-import { 
-  Upload, 
-  FileCode, 
-  X, 
-  Code2, 
+import dynamic from 'next/dynamic';
+import {
+  Upload,
+  FileCode,
+  X,
+  Code2,
   ArrowRight,
   LogOut,
   Folder,
@@ -20,6 +21,7 @@ import {
 // Import Components
 import ProjectsView from './projects/page';
 import LandingPage from './landing/page';
+import ConfirmDialog from './component/ConfirmDialog';
 
 // Editor Import
 const Editor = dynamic(() => import('@monaco-editor/react'), {
@@ -64,11 +66,14 @@ export default function Home() {
   const [code, setCode] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
   const [analyzing, setAnalyzing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [stage, setStage] = useState('Initializing');
 
   // Project Context State
   const [linkedProjectId, setLinkedProjectId] = useState<string | null>(null);
+
+  // Logout Confirmation State
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // --- Auth Check & Initialization ---
   useEffect(() => {
@@ -120,7 +125,7 @@ export default function Home() {
       fileToSend = file;
     } else {
       if (!code.trim()) {
-        alert("Please enter some code first.");
+        toast.error("Please enter some code first.");
         return;
       }
       const filename = generateRandomFilename(selectedLanguage.ext);
@@ -129,54 +134,48 @@ export default function Home() {
     }
 
     setAnalyzing(true);
-    setProgress(0);
-    setStage('Uploading...');
 
     const formData = new FormData();
     formData.append('file', fileToSend);
-    
+
     if (linkedProjectId) {
       formData.append('projectId', linkedProjectId);
     }
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const token = localStorage.getItem('accessToken');
-      
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 90) return prev;
-          return prev + Math.random() * 10;
-        });
-      }, 500);
 
       const response = await axios.post(`${API_BASE_URL}/explainations`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        signal: controller.signal
       });
-
-      clearInterval(progressInterval);
-      setProgress(100);
-      setStage('Complete');
 
       const newId = response.data.explanation?.id || response.data.id || response.data.data?.id;
 
       if (newId) {
-        setTimeout(() => {
-          router.push(`/explanation/${newId}`);
-        }, 800);
+        router.push(`/explanation/${newId}`);
       } else {
-        alert("Analysis finished, but no ID was returned.");
+        toast.error("Analysis finished, but no ID was returned.");
         setAnalyzing(false);
       }
 
     } catch (error: any) {
+      if (axios.isCancel(error)) return;
       console.error('Analysis failed:', error);
-      alert(error.response?.data?.message || 'Analysis failed. Please try again.');
+      toast.error(error.response?.data?.message || 'Analysis failed. Please try again.');
       setAnalyzing(false);
-      setProgress(0);
     }
+  };
+
+  const handleCancelAnalyze = () => {
+    abortControllerRef.current?.abort();
+    setAnalyzing(false);
   };
 
   const handleLogout = () => {
@@ -184,7 +183,8 @@ export default function Home() {
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
-    router.push('/'); 
+    setShowLogoutConfirm(false);
+    router.push('/');
   };
 
   const navTo = (page: string) => {
@@ -248,7 +248,7 @@ export default function Home() {
             <div className="h-6 w-[1px] bg-[#333333]"></div>
             
             {/* UPDATED LOGOUT BUTTON (Styled Pill) */}
-            <button onClick={handleLogout} className="group flex items-center gap-2 rounded-full pr-3 pl-1 py-1 bg-[#111111] border border-[#333333] hover:border-[#888888] transition-all">
+            <button onClick={() => setShowLogoutConfirm(true)} className="group flex items-center gap-2 rounded-full pr-3 pl-1 py-1 bg-[#111111] border border-[#333333] hover:border-[#888888] transition-all">
               <div className="size-6 rounded-full bg-[#333] flex items-center justify-center text-[10px] font-mono">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
@@ -272,13 +272,23 @@ export default function Home() {
               <button onClick={() => navTo('dashboard')} className="text-sm font-mono text-left px-2 text-white">/dashboard</button>
               <button onClick={() => router.push('/projects')} className="text-sm font-mono text-left px-2 text-[#888]">/projects</button>
               <div className="h-[1px] bg-[#333] w-full my-2"></div>
-              <button onClick={handleLogout} className="text-sm font-mono text-left text-red-400 px-2 flex items-center gap-2">
+              <button onClick={() => setShowLogoutConfirm(true)} className="text-sm font-mono text-left text-red-400 px-2 flex items-center gap-2">
                 <LogOut size={14} /> Logout
               </button>
             </nav>
           </div>
         )}
       </header>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Log out?"
+        message="You'll need to sign in again to access your projects and analyses."
+        confirmLabel="Log Out"
+        danger
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col p-4 sm:p-6 overflow-hidden">
@@ -421,56 +431,31 @@ export default function Home() {
                 </div>
               </>
             ) : (
-              // --- LOADING STATE (Matches Design) ---
+              // --- UPLOAD STATE ---
+              // Intentionally minimal: this only covers the brief upload request.
+              // Once the server accepts the job we navigate to /explanation/[id],
+              // which owns the single source of truth for queue/processing status.
               <div className="w-full max-w-[440px] bg-[#111111] border border-[#333333] rounded-md shadow-2xl overflow-hidden relative mx-4">
                 <div className="p-8 flex flex-col items-center text-center">
                   <div className="mb-6 relative">
                     <div className="relative bg-black rounded-full p-4 border border-[#333333]">
-                      <div className="animate-spin-slow">
-                        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <h2 className="text-lg font-medium text-white mb-2 tracking-tight">Analyzing Logic...</h2>
-                  
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-black border border-[#333333] mb-8">
-                    <span className="text-[10px] uppercase font-mono text-[#888888] tracking-widest">ID</span>
-                    <span className="text-xs font-mono text-white">#{(Math.random() * 10000).toFixed(0)}</span>
-                  </div>
-
-                  <div className="w-full mb-3">
-                    <div className="flex justify-between items-end mb-2 px-1">
-                      <span className="text-xs font-mono text-[#888888]">{stage}</span>
-                      <span className="text-xs font-mono text-white">{progress.toFixed(0)}%</span>
-                    </div>
-                    
-                    <div className="h-1 w-full bg-[#333333] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-white relative shadow-[0_0_8px_rgba(255,255,255,0.4)] transition-all duration-300 ease-out"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                    
-                    <div className="flex justify-between mt-2 px-1">
-                      <span className="text-[10px] text-[#888888] font-mono">PHASE 2/4</span>
-                      <span className="text-[10px] text-[#888888] font-mono">~12s REMAINING</span>
+                      <Loader2 className="w-8 h-8 text-white animate-spin" strokeWidth={1.5} />
                     </div>
                   </div>
 
-                  <p className="text-sm text-[#888888] mt-6 leading-relaxed max-w-xs mx-auto">
-                    Please wait while our AI breaks down the complexity and identifies optimization patterns.
+                  <h2 className="text-lg font-medium text-white mb-2 tracking-tight">Uploading...</h2>
+
+                  <p className="text-sm text-[#888888] mt-2 leading-relaxed max-w-xs mx-auto">
+                    Sending your code to the analysis queue. You&apos;ll be redirected automatically.
                   </p>
 
                   <div className="mt-8 w-full pt-6 border-t border-[#333333]">
-                    <button 
-                      onClick={() => setAnalyzing(false)}
+                    <button
+                      onClick={handleCancelAnalyze}
                       className="group w-full flex items-center justify-center gap-2 px-4 py-2 rounded bg-transparent border border-[#333333] text-[#888888] hover:text-white hover:border-[#888888] hover:bg-white/5 transition-all focus:outline-none focus:ring-1 focus:ring-white"
                     >
                       <X size={16} />
-                      <span className="text-xs font-mono font-medium">CANCEL_ANALYSIS</span>
+                      <span className="text-xs font-mono font-medium">CANCEL</span>
                     </button>
                   </div>
                 </div>

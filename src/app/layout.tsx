@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -29,6 +30,19 @@ export default function RootLayout({
         <main className="flex flex-col min-h-screen">
           {children}
         </main>
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: '#111111',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '13px'
+            }
+          }}
+        />
         <Analytics />
         <SpeedInsights />
       </body>

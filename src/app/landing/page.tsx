@@ -1,22 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  ArrowRight, 
-   
-  Cpu, 
-  Share2, 
-  Zap, 
-  ShieldCheck, 
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  Cpu,
+  Share2,
+  Zap,
+  ShieldCheck,
   Globe,
-  
   LayoutTemplate,
-
-  
   ChevronDown,
   Terminal,
-  FileCode
+  FileCode,
+  Check,
+  X
 } from 'lucide-react';
+
+const Reveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '-80px' }}
+    transition={{ duration: 0.6, delay, ease: 'easeOut' }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default function LandingPage() {
   return (
@@ -81,26 +91,45 @@ export default function LandingPage() {
         {/* --- HERO SECTION --- */}
         <section className="pt-24 pb-20 px-6 text-center max-w-5xl mx-auto relative">
 
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]"
+          >
+            Understand Code<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">in Seconds.</span>
+          </motion.h1>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
-         Understand Code<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">in Seconds.</span></h1>
-
-          <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+            className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed"
+          >
             Upload your code. Get instant explanations, complexity scores, and auto-generated documentation. No more guessing what that legacy function does.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
+          >
             <Link href="/users/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-lg font-bold transition-all hover:scale-105 flex items-center justify-center gap-2">
               Start Analyzing <ArrowRight size={18} />
             </Link>
             <Link href="/docs" className="w-full sm:w-auto px-8 py-4 bg-zinc-900 border border-zinc-700 text-white rounded-lg font-medium transition-all hover:bg-zinc-800 flex items-center justify-center gap-2">
               View Documentation
             </Link>
-          </div>
+          </motion.div>
 
           {/* Hero Visual/Mockup */}
-          <div className="relative rounded-xl border border-white/10 bg-[#0a0a0a] shadow-2xl overflow-hidden max-w-4xl mx-auto group">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
+            className="relative rounded-xl border border-white/10 bg-[#0a0a0a] shadow-2xl overflow-hidden max-w-4xl mx-auto group">
              <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-[#050505]">
                 <div className="flex gap-1.5">
@@ -132,61 +161,49 @@ export default function LandingPage() {
                     </div>
                 </div>
              </div>
-          </div>
+          </motion.div>
         </section>
-
-        {/* --- STATS BAR --- */}
-        {/* <div className="border-y border-white/5 bg-black/50 backdrop-blur-sm py-10">
-            <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                {[
-                    { label: "Languages Supported", value: "50+" },
-                    { label: "Parsing Speed", value: "< 2s" },
-                    { label: "Active Developers", value: "10k+" },
-                    { label: "Code Lines Analyzed", value: "1M+" },
-                ].map((stat, i) => (
-                    <div key={i}>
-                        <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                        <div className="text-zinc-500 text-sm font-mono uppercase tracking-wider">{stat.label}</div>
-                    </div>
-                ))}
-            </div>
-        </div> */}
 
         {/* --- PROBLEM vs SOLUTION --- */}
         <section className="py-24 px-6 max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Manual Review Fails</h2>
-                <p className="text-zinc-500">Stop wasting hours reading spaghetti code.</p>
-            </div>
-            
+            <Reveal>
+              <div className="text-center mb-16">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Manual Review Fails</h2>
+                  <p className="text-zinc-500">Stop wasting hours reading spaghetti code.</p>
+              </div>
+            </Reveal>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Old Way */}
-                <div className="p-8 rounded-2xl border border-red-900/20 bg-red-900/5 relative overflow-hidden">
-                   
-                    <h3 className="text-xl font-bold text-red-200 mb-6">The Old Way</h3>
-                    <ul className="space-y-4 text-zinc-400">
-                        <li className="flex gap-3"> Spend hours tracing variable states manually.</li>
-                        <li className="flex gap-3"> Outdated documentation that lies to you.</li>
-                        <li className="flex gap-3">  Missed edge cases and hidden bugs.</li>
-                    </ul>
-                </div>
+                <Reveal>
+                  <div className="p-8 rounded-2xl border border-red-900/20 bg-red-900/5 relative overflow-hidden h-full">
+                      <h3 className="text-xl font-bold text-red-200 mb-6">The Old Way</h3>
+                      <ul className="space-y-4 text-zinc-400">
+                          <li className="flex gap-3"><X className="text-red-500 shrink-0 mt-0.5" size={18} /> Spend hours tracing variable states manually.</li>
+                          <li className="flex gap-3"><X className="text-red-500 shrink-0 mt-0.5" size={18} /> Outdated documentation that lies to you.</li>
+                          <li className="flex gap-3"><X className="text-red-500 shrink-0 mt-0.5" size={18} /> Missed edge cases and hidden bugs.</li>
+                      </ul>
+                  </div>
+                </Reveal>
 
                 {/* CodeWise Way */}
-                <div className="p-8 rounded-2xl border border-emerald-900/20 bg-emerald-900/5 relative overflow-hidden">
-                    
-                    <h3 className="text-xl font-bold text-emerald-200 mb-6">The CodeWise Way</h3>
-                    <ul className="space-y-4 text-zinc-300">
-                        <li className="flex gap-3"> Instant logic breakdown in plain English.</li>
-                        <li className="flex gap-3"> Auto-generated, always up-to-date docs.</li>
-                        <li className="flex gap-3"> Complexity scores to identify refactoring targets.</li>
-                    </ul>
-                </div>
+                <Reveal delay={0.1}>
+                  <div className="p-8 rounded-2xl border border-emerald-900/20 bg-emerald-900/5 relative overflow-hidden h-full">
+                      <h3 className="text-xl font-bold text-emerald-200 mb-6">The CodeWise Way</h3>
+                      <ul className="space-y-4 text-zinc-300">
+                          <li className="flex gap-3"><Check className="text-emerald-500 shrink-0 mt-0.5" size={18} /> Instant logic breakdown in plain English.</li>
+                          <li className="flex gap-3"><Check className="text-emerald-500 shrink-0 mt-0.5" size={18} /> Auto-generated, always up-to-date docs.</li>
+                          <li className="flex gap-3"><Check className="text-emerald-500 shrink-0 mt-0.5" size={18} /> Complexity scores to identify refactoring targets.</li>
+                      </ul>
+                  </div>
+                </Reveal>
             </div>
         </section>
 
         {/* --- DEEP DIVE FEATURE 1: ANALYSIS --- */}
         <section id="features" className="py-24 px-6 border-t border-white/5 bg-[#030303]">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
+                <Reveal>
                 <div className="flex-1 space-y-6">
                     <div className="w-12 h-12 bg-indigo-900/30 rounded-xl flex items-center justify-center border border-indigo-500/30 text-indigo-400 mb-4">
                         <Cpu size={24} />
@@ -203,6 +220,8 @@ export default function LandingPage() {
                         ))}
                     </ul>
                 </div>
+                </Reveal>
+                <Reveal delay={0.15}>
                 <div className="flex-1 w-full">
                     {/* Visual Card */}
                     <div className="glass-card rounded-2xl p-6 relative group">
@@ -223,12 +242,14 @@ export default function LandingPage() {
                         </div>
                     </div>
                 </div>
+                </Reveal>
             </div>
         </section>
 
         {/* --- DEEP DIVE FEATURE 2: AUTO DOCS --- */}
         <section className="py-24 px-6">
             <div className="max-w-6xl mx-auto flex flex-col-reverse md:flex-row items-center gap-16">
+                <Reveal>
                 <div className="flex-1 w-full">
                      {/* Visual Card */}
                      <div className="glass-card rounded-2xl p-1 relative overflow-hidden group">
@@ -271,17 +292,20 @@ export default function LandingPage() {
                         ))}
                     </ul>
                 </div>
+                </Reveal>
             </div>
         </section>
 
         {/* --- BENTO GRID (Other Features) --- */}
         <section className="py-24 px-6 border-t border-white/5 bg-[#050505]">
             <div className="max-w-6xl mx-auto">
+                <Reveal>
                 <div className="text-center mb-16">
                     <h2 className="text-3xl font-bold mb-4">Everything included</h2>
                     <p className="text-zinc-500">Tools designed for the complete development lifecycle.</p>
                 </div>
-                
+                </Reveal>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Share */}
                     <div className="md:col-span-2 p-8 rounded-2xl border border-white/10 bg-zinc-900/20 hover:border-emerald-500/30 transition-all group">
@@ -307,7 +331,7 @@ export default function LandingPage() {
                     {/* Languages */}
                     <div className="md:col-span-2 p-8 rounded-2xl border border-white/10 bg-zinc-900/20 hover:border-yellow-500/30 transition-all">
                         <Globe className="text-yellow-400 mb-4" size={32} />
-                        <h3 className="text-xl font-bold mb-2"> Languages Supported</h3>
+                        <h3 className="text-xl font-bold mb-2">Languages Supported</h3>
                         <div className="flex flex-wrap gap-2 mt-4">
                             {['JS', 'TS', 'Python', 'Go', 'Rust', 'Java', 'C++', 'C#', 'PHP', 'Ruby'].map(lang => (
                                 <span key={lang} className="px-2 py-1 rounded bg-black border border-white/10 text-xs text-zinc-500">{lang}</span>
@@ -321,13 +345,15 @@ export default function LandingPage() {
 
         {/* --- FAQ SECTION --- */}
         <section className="py-24 px-6 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+            <Reveal>
+              <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+            </Reveal>
             <div className="space-y-4">
                 {[
                     { q: "Is my code stored on your servers?", a: "We process code in-memory for analysis. Code associated with Projects is stored securely, but you can delete it at any time." },
                     { q: "Can I analyze private repositories?", a: "Yes. You can upload files from private repos manually. Direct GitHub integration is coming in v2.0." },
                     { q: "Is there a free tier?", a: "Absolutely. The Personal plan is free forever and includes 100 analyses per month." },
-                    { q: "How accurate is the AI explanation?", a: "We use specialized models  tuned for code. While highly accurate, we always recommend developer review for critical logic." }
+                    { q: "How accurate is the AI explanation?", a: "We use specialized models tuned for code. While highly accurate, we always recommend developer review for critical logic." }
                 ].map((item, i) => (
                     <div key={i} className="border border-white/10 rounded-lg bg-zinc-900/30 overflow-hidden">
                         <details className="group">
@@ -347,21 +373,23 @@ export default function LandingPage() {
         {/* --- FINAL CTA --- */}
         <section className="py-32 px-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 to-transparent pointer-events-none" />
-          <div className="max-w-3xl mx-auto relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to optimize?</h2>
-            <p className="text-zinc-400 text-lg mb-10">Join thousands of developers writing better code, faster.</p>
-            <Link 
-              href="/users/signup"
-              className="inline-flex items-center gap-2 px-10 py-4 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-all hover:scale-105 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]"
-            >
-              Get Started for Free
-            </Link>
-          </div>
+          <Reveal>
+            <div className="max-w-3xl mx-auto relative z-10">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to optimize?</h2>
+              <p className="text-zinc-400 text-lg mb-10">Understand your codebase faster, one file at a time.</p>
+              <Link
+                href="/users/signup"
+                className="inline-flex items-center gap-2 px-10 py-4 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-all hover:scale-105 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]"
+              >
+                Get Started for Free
+              </Link>
+            </div>
+          </Reveal>
         </section>
 
         {/* FOOTER */}
         <footer className="border-t border-white/5 bg-black py-12 px-6">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
             <div className="flex items-center gap-2">
               <div className="size-6 text-zinc-500">
                 <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -372,8 +400,13 @@ export default function LandingPage() {
               <span className="font-mono font-bold text-zinc-400">CodeWise</span>
               <span className="text-zinc-600 text-xs ml-2">© 2026 CodeWise Inc.</span>
             </div>
-            
-           
+
+            <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-zinc-500">
+              <Link href="#features" className="hover:text-white transition-colors">Features</Link>
+              <Link href="/docs" className="hover:text-white transition-colors">Documentation</Link>
+              <Link href="/users/signin" className="hover:text-white transition-colors">Log in</Link>
+              <Link href="/users/signup" className="hover:text-white transition-colors">Get Started</Link>
+            </nav>
           </div>
         </footer>
 

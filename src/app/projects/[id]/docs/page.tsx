@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { 
+import { toast } from 'sonner';
+import {
   Book, 
   ChevronRight, 
   FileText, 
@@ -77,9 +78,10 @@ export default function ProjectDocs() {
           setActivePage(firstSection.pages[0]);
         }
         // Agar active page tha, to content refresh ho jayega automatically
+        toast.success("Documentation generated");
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to generate docs");
+      toast.error(error.response?.data?.message || "Failed to generate docs");
     } finally {
       setGenerating(false);
     }

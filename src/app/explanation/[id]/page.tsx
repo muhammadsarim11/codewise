@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { API_BASE_URL } from '../../utils/api';
 // 1. Import Dynamic from Next.js
 import dynamic from 'next/dynamic';
@@ -251,9 +252,10 @@ export default function ExplanationResult() {
       addSection("6. Improvements", improvementsText);
       
       doc.save(`${data.fileName ? data.fileName.split('.')[0] : 'analysis'}_report.pdf`);
+      toast.success("PDF report downloaded");
     }).catch(err => {
       console.error(err);
-      alert("Failed to load PDF generator. Please try again.");
+      toast.error("Failed to load PDF generator. Please try again.");
     });
   };
 
@@ -283,12 +285,12 @@ export default function ExplanationResult() {
         setShowShareModal(true);
         setData(prev => prev ? { ...prev, isPublic: true, publicShareId: shareId } : null);
       } else {
-        alert("Failed to generate share link");
+        toast.error("Failed to generate share link");
       }
 
     } catch (error: any) {
       console.error("Share error:", error);
-      alert(error.response?.data?.message || "Failed to share");
+      toast.error(error.response?.data?.message || "Failed to share");
     } finally {
       setShareLoading(false);
     }
@@ -297,6 +299,7 @@ export default function ExplanationResult() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareLink);
     setCopied(true);
+    toast.success("Link copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 

@@ -3,13 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { API_BASE_URL } from '../utils/api';
-import { 
-  Folder, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  Loader2, 
+import ConfirmDialog from '../component/ConfirmDialog';
+import {
+  Folder,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
   X,
   FileCode,
   ArrowRight,
@@ -69,6 +71,9 @@ export default function ProjectsView() {
   const [shareModalData, setShareModalData] = useState<{link: string, id: string} | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Logout Confirmation State
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   useEffect(() => {
     // Load User for Navbar
     const storedUser = localStorage.getItem('user');
@@ -83,7 +88,8 @@ export default function ProjectsView() {
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
-    router.push('/'); 
+    setShowLogoutConfirm(false);
+    router.push('/');
   };
 
   const navTo = (path: string) => {
@@ -143,8 +149,9 @@ export default function ProjectsView() {
       
       setProjects(prev => [res.data.project, ...prev]);
       closeModal();
+      toast.success("Project created successfully");
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to create project");
+      toast.error(error.response?.data?.message || "Failed to create project");
     }
   };
 
@@ -163,8 +170,9 @@ export default function ProjectsView() {
 
       setProjects(prev => prev.map(p => p.id === currentProject.id ? res.data.project : p));
       closeModal();
+      toast.success("Project updated");
     } catch (error: any) {
-      alert(error.response?.data?.message || "Failed to update project");
+      toast.error(error.response?.data?.message || "Failed to update project");
     }
   };
 
@@ -188,12 +196,13 @@ export default function ProjectsView() {
       });
       setProjects(prev => prev.filter(p => p.id !== projectToDelete.id));
       if (selectedProject?.id === projectToDelete.id) handleBackToProjects();
+      toast.success("Project deleted");
     } catch (error: any) {
-      alert("Failed to delete project");
+      toast.error("Failed to delete project");
     } finally {
       closeDeleteModal();
     }
-  }; 
+  };
 
   const handleShare = async (e: React.MouseEvent, explanationId: string) => {
     e.stopPropagation();
@@ -207,15 +216,15 @@ export default function ProjectsView() {
       if (shareId) {
         const shareUrl = `${window.location.origin}/share/${shareId}`;
         setShareModalData({ link: shareUrl, id: explanationId });
-        setProjectExplanations(prev => prev.map(ex => 
+        setProjectExplanations(prev => prev.map(ex =>
           ex.id === explanationId ? { ...ex, isPublic: true } : ex
         ));
       } else {
-        alert("Could not generate share link.");
+        toast.error("Could not generate share link.");
       }
     } catch (error: any) {
       console.error("Share failed", error);
-      alert("Failed to share explanation");
+      toast.error("Failed to share explanation");
     }
   };
 
@@ -223,6 +232,7 @@ export default function ProjectsView() {
     if (shareModalData) {
       navigator.clipboard.writeText(shareModalData.link);
       setCopied(true);
+      toast.success("Link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -309,7 +319,7 @@ export default function ProjectsView() {
             <div className="h-6 w-[1px] bg-[#333333]"></div>
             
             {user && (
-                <button onClick={handleLogout} className="group flex items-center gap-2 rounded-full pr-3 pl-1 py-1 bg-[#111111] border border-[#333333] hover:border-[#888888] transition-all">
+                <button onClick={() => setShowLogoutConfirm(true)} className="group flex items-center gap-2 rounded-full pr-3 pl-1 py-1 bg-[#111111] border border-[#333333] hover:border-[#888888] transition-all">
                 <div className="size-6 rounded-full bg-[#333] flex items-center justify-center text-[10px] font-mono">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
@@ -334,13 +344,23 @@ export default function ProjectsView() {
               <button onClick={() => navTo('/')} className="text-sm font-mono text-left px-2 text-[#888]">/dashboard</button>
               <button className="text-sm font-mono text-left px-2 text-white">/projects</button>
               <div className="h-[1px] bg-[#333] w-full my-2"></div>
-              <button onClick={handleLogout} className="text-sm font-mono text-left text-red-400 px-2 flex items-center gap-2">
+              <button onClick={() => setShowLogoutConfirm(true)} className="text-sm font-mono text-left text-red-400 px-2 flex items-center gap-2">
                 <LogOut size={14} /> Logout
               </button>
             </nav>
           </div>
         )}
       </header>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Log out?"
+        message="You'll need to sign in again to access your projects and analyses."
+        confirmLabel="Log Out"
+        danger
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
 
       {/* --- Main Content --- */}
       <main className="relative z-10 flex-1 flex flex-col p-4 sm:p-6 overflow-hidden">

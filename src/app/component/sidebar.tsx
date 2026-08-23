@@ -1,13 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Folder, 
-  Clock, 
-  Settings, 
-  LogOut 
+import {
+  LayoutDashboard,
+  Folder,
+  Clock,
+  Settings,
+  LogOut
 } from 'lucide-react';
+import ConfirmDialog from './ConfirmDialog';
 
 interface SidebarProps {
   activePage: string;
@@ -17,6 +19,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activePage, setActivePage, user }: SidebarProps) {
   const router = useRouter();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleNavigation = (page: string) => {
     if (setActivePage) {
@@ -33,6 +36,7 @@ export default function Sidebar({ activePage, setActivePage, user }: SidebarProp
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
+    setShowLogoutConfirm(false);
     router.push('/users/signin');
   };
 
@@ -91,14 +95,24 @@ export default function Sidebar({ activePage, setActivePage, user }: SidebarProp
                       <p className="text-xs text-[#666] truncate font-mono">{user.email}</p>
                   </div>
               </div>
-              <button 
-                  onClick={handleLogout}
+              <button
+                  onClick={() => setShowLogoutConfirm(true)}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-mono text-[#888] hover:text-red-400 hover:bg-red-900/10 transition-colors"
               >
                   <LogOut size={14} /> Sign Out
               </button>
           </div>
       )}
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Log out?"
+        message="You'll need to sign in again to access your projects and analyses."
+        confirmLabel="Log Out"
+        danger
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </aside>
   );
 }

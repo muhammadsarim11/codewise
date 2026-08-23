@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { API_BASE_URL } from '../../utils/api';
 import Editor from '@monaco-editor/react';
 import { 
@@ -139,12 +140,14 @@ export default function PublicSharePage() {
       addSection("6. Improvements", data.improvements.map(i => `• ${i}`).join('\n'));
       
       doc.save(`${data.fileName ? data.fileName.split('.')[0] : 'analysis'}_report.pdf`);
-    }).catch(err => alert("Failed to export PDF."));
+      toast.success("PDF report downloaded");
+    }).catch(() => toast.error("Failed to export PDF."));
   };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
+    toast.success("Link copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 
