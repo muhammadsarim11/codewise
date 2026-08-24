@@ -13,12 +13,7 @@ if(name.length < 3){
     return res.status(400).json({message:"Name must be at least 3 characters long"})
 }
 
-console.log(
-    name,
-    description,
-    req.user.id
-)
-const project = await prisma.Project.create({
+const project = await prisma.project.create({
 data:{
     name,
     description,
@@ -31,6 +26,7 @@ return res.status(200).json({
     project
 })
     } catch (error) {
+        console.error('CreateProject error:', error)
         return res.status(500).json({message:"Internal Server Error"})
     }
 
@@ -49,15 +45,29 @@ export const EditProject = async (req,res)=>{
         if(name.length < 3){
             return res.status(400).json({message:"Name must be at least 3 characters long"})
         }
-       const project = await prisma.Project.update({
+
+       // Scope the write to the owner. updateMany (rather than update) is what
+       // lets a non-unique userId into the where clause; count tells us whether
+       // the row existed AND belonged to this user, without a second query.
+       const {count} = await prisma.project.updateMany({
         where:{
-            id:id
+            id: id,
+            userId: req.user.id
         },
         data:{
             name,
             description
         }
        })
+
+       // 404 rather than 403: a probing user learns nothing about whether the
+       // id exists, only that it isn't theirs to see.
+       if(count === 0){
+        return res.status(404).json({message:"Project not found"})
+       }
+
+       const project = await prisma.project.findUnique({where:{id: id}})
+
        return res.status(200).json({
         message:"Updated Successfully",
         project
@@ -65,6 +75,7 @@ export const EditProject = async (req,res)=>{
     }   
         
     catch (error) {
+        console.error('EditProject error:', error)
         return res.status(500).json({message:"Internal Server Error"})
     }
 
@@ -74,17 +85,24 @@ export const EditProject = async (req,res)=>{
 export const DeleteProject = async (req,res)=>{
     const {id} = req.params
     try {   
-        const project = await prisma.Project.delete({
+        const {count} = await prisma.project.deleteMany({
             where:{
-                id: id
+                id: id,
+                userId: req.user.id
             }
-              })
-            return res.status(200).json({   
+        })
+
+        if(count === 0){
+            return res.status(404).json({message:"Project not found"})
+        }
+
+        return res.status(200).json({   
             message:"Deleted Successfully",
-            project
-           })
+            id
+        })
     }
         catch (error) { 
+        console.error('DeleteProject error:', error)
         return res.status(500).json({message:"Internal Server Error"})
     }
 
@@ -99,17 +117,19 @@ export const getProject = async (req,res)=>{
             message:"invalid token"
         })
     }
-    const projects = await prisma.Project.findMany({
-      where: { userId: id },
-    });
 
+    try {
+        const projects = await prisma.project.findMany({
+          where: { userId: id },
+          orderBy: { createdAt: 'desc' },
+        });
 
-    return res.status(200).json({
-    message:"fetched successfully!",
-    projects
-    })
-
-
-
-
+        return res.status(200).json({
+        message:"fetched successfully!",
+        projects
+        })
+    } catch (error) {
+        console.error('getProject error:', error)
+        return res.status(500).json({message:"Internal Server Error"})
+    }
 }

@@ -1,7 +1,53 @@
 import prisma from "../config/prisma.js"
 import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 import { generateToken } from "../utility/jwt.js";
 import { sendEmail } from "../services/nodemailer.js";
+import {
+  ACCESS_TOKEN_TTL,
+  REFRESH_TOKEN_TTL,
+  accessCookieOptions,
+  refreshCookieOptions,
+  clearCookieOptions,
+} from "../utility/cookies.js";
+
+// Every user query that reaches a response body uses this allow-list. Never
+// return a bare findUnique: the row carries the password hash, the refresh
+// token, and a live password-reset OTP.
+const PUBLIC_USER_FIELDS = {
+  id: true,
+  name: true,
+  email: true,
+  bio: true,
+  role: true,
+  createdAt: true,
+};
+
+// Mints a fresh token pair, persists the refresh token, and writes both cookies.
+// Used by sign-in and by refresh, so rotation behaves identically in both.
+const issueSession = async (req, res, user) => {
+  const accessToken = generateToken(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: ACCESS_TOKEN_TTL }
+  );
+
+  const refreshToken = generateToken(
+    { id: user.id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: REFRESH_TOKEN_TTL }
+  );
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken },
+  });
+
+  res.cookie("accessToken", accessToken, accessCookieOptions(req));
+  res.cookie("refreshToken", refreshToken, refreshCookieOptions(req));
+
+  return accessToken;
+};
 
 export const SignUp = async (req, res) => {
   try {
@@ -73,37 +119,16 @@ export const SignIn = async (req, res) => {
       });
     }
 
-    const accessToken = generateToken(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    const refreshToken = generateToken(
-      { id: user.id },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    // Optional: Store refresh token in DB (good for security)
-    await prisma.User.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
-
-    // 🧈 Send access token as httpOnly cookie
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none", // frontend and backend are on different domains
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    const accessToken = await issueSession(req, res, user);
 
     const { password: _, ...userWithoutPassword } = user;
 
     return res.status(200).json({
       message: "Login successful",
       user: userWithoutPassword,
+      // Transitional: the session now lives in httpOnly cookies. This field is
+      // kept for one release so clients still holding a bearer token keep
+      // working, and should be dropped once the frontend stops reading it.
       accessToken,
     });
   }
@@ -116,6 +141,77 @@ export const SignIn = async (req, res) => {
   }
 };
 
+
+
+/**
+ * Exchanges a valid refresh token for a fresh pair. The token is rotated on
+ * every use, so a stolen refresh cookie is good for at most one call, and the
+ * theft surfaces the next time the real user refreshes and is rejected.
+ */
+export const refreshSession = async (req, res) => {
+  try {
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      return res.status(401).json({ success: false, error: "No refresh token provided" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    } catch {
+      return res.status(401).json({ success: false, error: "Invalid refresh token" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, role: true, refreshToken: true },
+    });
+
+    // A mismatch means the token was already rotated away, or revoked by
+    // logout, so it is no longer a live session even though it still verifies.
+    if (!user || user.refreshToken !== token) {
+      return res.status(401).json({ success: false, error: "Invalid refresh token" });
+    }
+
+    const accessToken = await issueSession(req, res, user);
+
+    return res.status(200).json({ success: true, accessToken });
+  } catch (error) {
+    console.error('Refresh Error:', error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+/**
+ * Clears the session in the browser and server-side. Always 204: logging out of
+ * an already-dead session is not a failure.
+ */
+export const logout = async (req, res) => {
+  try {
+    const token = req.cookies?.refreshToken;
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        await prisma.user.updateMany({
+          where: { id: decoded.id },
+          data: { refreshToken: null },
+        });
+      } catch {
+        // Expired or forged token: nothing to revoke, but still clear cookies.
+      }
+    }
+
+    res.clearCookie("accessToken", clearCookieOptions(req));
+    res.clearCookie("refreshToken", clearCookieOptions(req));
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error('Logout Error:', error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
 
 export const forgotPassword = async (req, res) => {
@@ -214,6 +310,7 @@ export const getUser = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id },
+      select: PUBLIC_USER_FIELDS,
     });
 
     if (!user) {

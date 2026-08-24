@@ -2,7 +2,7 @@ import { parseUploadedFile } from "../services/file.parser.js";
 import { parseRawCodeInput } from "../services/file.parser.js";
 import prisma from "../config/prisma.js"
 import { explanationQueue } from "../utility/redis.js";
-import { CacheService } from "../services/cache.service.js";
+import { CacheService, explanationKey } from "../services/cache.service.js";
 
 
 
@@ -125,7 +125,8 @@ export const getExplanation = async (req, res) => {
   try {
 
     // 1. Check Cache
-    const cachedData = await CacheService.get(id);
+    const cacheKey = explanationKey(req.user.id, id);
+    const cachedData = await CacheService.get(cacheKey);
   if (cachedData && Object.keys(cachedData).length > 0) {
         return res.json({
             success: true,
@@ -161,7 +162,7 @@ export const getExplanation = async (req, res) => {
 
   
     if (codeExplanation.status === 'COMPLETED') {
-        CacheService.set(codeExplanation.id, codeExplanation);
+        CacheService.set(cacheKey, codeExplanation);
     }
 
     return res.status(200).json({

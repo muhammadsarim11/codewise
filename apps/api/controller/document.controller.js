@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { canAccessProject } from "../utility/authz.js";
 
 // 1. Define the Strict Schema for Documentation
 // Ye ensure karega ke AI hamesha sahi format return kare
@@ -188,12 +189,7 @@ export const getProjectDocs = async (req, res) => {
         const { projectId } = req.params;
         const userId = req.user.id;
     
-        const project = await prisma.project.findUnique({
-          where: { id: projectId },
-          select: { userId: true }
-        });
-    
-        if (!project || project.userId !== userId) {
+        if (!(await canAccessProject(userId, projectId))) {
           return res.status(403).json({ message: "Unauthorized" });
         }
     
