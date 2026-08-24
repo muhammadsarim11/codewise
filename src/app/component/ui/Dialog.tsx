@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/app/utils/cn';
 
@@ -18,6 +18,14 @@ export interface DialogProps {
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
+// The close button lives in the header, ahead of the dialog's own content, so a
+// bare FOCUSABLE query hands it the initial focus. A form dialog should open in
+// its first field instead.
+const FIELDS =
+  'input:not([disabled]), textarea:not([disabled]), select:not([disabled])';
+
+const isVisible = (el: HTMLElement) => el.offsetParent !== null;
+
 /**
  * The one dialog in the app. Replaces three hand-rolled implementations that
  * each missed something different — focus trapping, Escape, or scroll lock.
@@ -34,11 +42,21 @@ export function Dialog({
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreFocusTo = useRef<HTMLElement | null>(null);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
+  // Callers rebuild onClose on every render, so the setup effect below must not
+  // depend on its identity. It used to, which tore the dialog down and refocused
+  // it on every keystroke — throwing the caret onto the close button mid-word.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -48,7 +66,7 @@ export function Dialog({
       // behind the overlay, which is invisible but still reachable.
       const items = Array.from(
         panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)
-      ).filter((el) => el.offsetParent !== null);
+      ).filter(isVisible);
 
       if (items.length === 0) return;
 
@@ -62,12 +80,7 @@ export function Dialog({
         event.preventDefault();
         first.focus();
       }
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    if (!open) return;
+    };
 
     restoreFocusTo.current = document.activeElement as HTMLElement | null;
 
@@ -77,8 +90,11 @@ export function Dialog({
 
     // Move focus into the panel so a keyboard user starts inside the dialog.
     const timer = window.setTimeout(() => {
-      const target = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
-      (target ?? panelRef.current)?.focus();
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const field = Array.from(panel.querySelectorAll<HTMLElement>(FIELDS)).find(isVisible);
+      (field ?? panel.querySelector<HTMLElement>(FOCUSABLE) ?? panel).focus();
     }, 0);
 
     return () => {
@@ -87,7 +103,7 @@ export function Dialog({
       document.body.style.overflow = overflow;
       restoreFocusTo.current?.focus();
     };
-  }, [open, handleKeyDown]);
+  }, [open]);
 
   if (!open) return null;
 
