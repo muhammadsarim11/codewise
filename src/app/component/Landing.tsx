@@ -123,7 +123,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <Logo className="size-5 text-accent" />
-            <span className="text-[15px] font-semibold tracking-tight">CodeWise</span>
+            <span className="text-[15px] font-semibold tracking-tight text-accent">CodeWise</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-7 text-[13px] text-ink-2">

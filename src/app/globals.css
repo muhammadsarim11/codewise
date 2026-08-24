@@ -35,9 +35,10 @@
      and failed AA for the small text this tier is used for. */
   --color-ink-3: #666f80;
 
-  /* One accent, used for action and active state only */
-  --color-accent: #2e5288;
-  --color-accent-hover: #26456f;
+  /* One accent, used for action and active state only. Vercel's blue for high
+     contrast on light ground. */
+  --color-accent: #3291ff;
+  --color-accent-hover: #0070f3;
   --color-accent-soft: #eaf0f8;
   --color-accent-fg: #ffffff;
 
@@ -51,7 +52,7 @@
   --color-good: #2c6a4f;
   --color-good-soft: #eaf4ef;
 
-  --color-ring: #2e5288;
+  --color-ring: #3291ff;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;

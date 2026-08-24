@@ -69,7 +69,7 @@ export default function Documentation() {
               </svg>
             </div>
             <div className="leading-none">
-              <p className="text-[14px] font-semibold tracking-tight">CodeWise</p>
+              <p className="text-[14px] font-semibold tracking-tight text-accent">CodeWise</p>
               <span className="text-[11px] text-ink-3">Documentation</span>
             </div>
           </Link>
