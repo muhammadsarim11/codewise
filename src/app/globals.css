@@ -60,42 +60,47 @@
   --shadow-float: 0 1px 2px rgba(14, 18, 25, 0.04), 0 8px 24px -12px rgba(14, 18, 25, 0.12);
 }
 
+/*
+  Dark is a true-black scale modelled on Vercel's: the page itself is #000 and
+  elevation is carried by borders and near-black steps rather than by lifting the
+  ground. Shadows are nearly invisible against #000, so the border tiers do that
+  work instead — which is why they are stronger here than their light-mode peers.
+*/
 .dark {
-  /* Not pure black: pure black crushes elevation, so raised surfaces have
-     nowhere to go. */
-  --color-ground: #0c0f14;
-  --color-surface: #131820;
-  --color-surface-2: #1a212b;
+  --color-ground: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-2: #1a1a1a;
 
-  --color-border: #232c38;
-  --color-border-strong: #33404f;
+  --color-border: #1f1f1f;
+  --color-border-strong: #2e2e2e;
 
-  /* Not pure white either — reduces halation on dark grounds. */
-  --color-ink: #e7ebf0;
-  --color-ink-2: #a3aebd;
-  /* 5.25:1 on ground, 4.87:1 on surface. */
-  --color-ink-3: #7a8797;
+  /* Not pure white — reduces halation on a black ground. 17.9:1 on ground. */
+  --color-ink: #ededed;
+  --color-ink-2: #a1a1a1;
+  /* 6.49:1 on ground, 6.12:1 on surface. */
+  --color-ink-3: #8f8f8f;
 
-  /* Lifted: #2e5288 fails contrast against a dark ground. */
-  --color-accent: #7ca6de;
-  --color-accent-hover: #9cbeea;
-  --color-accent-soft: #16202e;
-  --color-accent-fg: #0c0f14;
+  /* The light theme's #2e5288 is invisible here; this is Vercel's blue at the
+     step that clears AA on black (6.63:1). */
+  --color-accent: #3291ff;
+  --color-accent-hover: #52a8ff;
+  --color-accent-soft: #0d1a2d;
+  --color-accent-fg: #000000;
 
-  /* Dark's critical is a light red, so its foreground has to flip too:
-     white-on-#e08a84 sits near 2:1 and fails badly. */
-  --color-critical: #e08a84;
-  --color-critical-fg: #0c0f14;
-  --color-critical-soft: #241618;
-  --color-warn: #d9ae62;
-  --color-warn-soft: #231c10;
-  --color-good: #6fbf95;
-  --color-good-soft: #10201a;
+  /* Dark's states are light tints, so their foregrounds flip to black:
+     white on #ff6166 sits near 2:1 and fails badly. */
+  --color-critical: #ff6166;
+  --color-critical-fg: #000000;
+  --color-critical-soft: #200a0b;
+  --color-warn: #f5a623;
+  --color-warn-soft: #1f1503;
+  --color-good: #3dd68c;
+  --color-good-soft: #0a1f16;
 
-  --color-ring: #7ca6de;
+  --color-ring: #3291ff;
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.6), 0 8px 24px -12px rgba(0, 0, 0, 0.9);
 }
 
 /* ---------------------------------------------------------------- base */

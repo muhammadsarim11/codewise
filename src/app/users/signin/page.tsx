@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import api from '../../utils/api';
+import api, { storeAccessToken } from '../../utils/api';
 import { AuthLayout, FormError, FormSuccess } from '../../component/AuthLayout';
 import { Button } from '../../component/ui/Button';
 import { Input } from '../../component/ui/Field';
@@ -31,11 +31,13 @@ function SignInForm() {
 
     try {
       const response = await api.post('/signin', { email, password });
-      const { user } = response.data;
+      const { user, accessToken } = response.data;
 
       if (user) {
-        // The session itself is an httpOnly cookie set by the API. This copy is
-        // only a display cache for the sidebar; it never authenticates a request.
+        // Both halves matter. The cookie is blocked as a third-party cookie in
+        // several browsers, so the bearer token is what actually carries the
+        // session there; the user object is a display cache for the sidebar.
+        storeAccessToken(accessToken);
         localStorage.setItem('user', JSON.stringify(user));
         router.push('/');
       } else {

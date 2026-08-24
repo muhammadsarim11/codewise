@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'sonner';
-import api, { clearLocalSession, logout as endSession } from './utils/api';
+import api, { clearLocalSession, logout as endSession, readCachedUser } from './utils/api';
 import dynamic from 'next/dynamic';
 import {
   Upload,
@@ -24,6 +24,7 @@ import { Select } from './component/ui/Field';
 import { ThemeToggle } from './component/ui/ThemeToggle';
 import { useTheme } from './component/ThemeProvider';
 import { cn } from './utils/cn';
+import { defineMonacoThemes, MONACO_DARK, MONACO_LIGHT } from './utils/monacoTheme';
 
 const Editor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -54,7 +55,6 @@ export default function Home() {
   const router = useRouter();
   const { theme } = useTheme();
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
@@ -71,34 +71,37 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
 
-    // The session is an httpOnly cookie the page cannot read, so the only way to
-    // know whether it is still good is to ask. /profile doubles as the
-    // authoritative user record, replacing the stale localStorage copy.
-    (async () => {
+    const resolveSession = async () => {
+      const paramProjectId = new URLSearchParams(window.location.search).get('projectId');
+      if (paramProjectId) {
+        setLinkedProjectId(paramProjectId);
+      }
+
+      // Show the cached user straight away. The probe below is the authority,
+      // but the API cold-starts on demand and can take seconds to answer —
+      // waiting on it left the root URL blank, landing page included.
+      setUser(readCachedUser());
+
       try {
         const res = await api.get('/profile', { skipAuthRedirect: true });
         if (cancelled) return;
 
         const profile = res.data.user;
         setUser(profile);
-        setIsAuthenticated(true);
         localStorage.setItem('user', JSON.stringify(profile));
-
-        const paramProjectId = new URLSearchParams(window.location.search).get('projectId');
-        if (paramProjectId) {
-          setLinkedProjectId(paramProjectId);
-        }
       } catch {
         if (cancelled) return;
         clearLocalSession();
-        setIsAuthenticated(false);
+        setUser(null);
       }
-    })();
+    };
+
+    resolveSession();
 
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, []);
 
   // --- Handlers ---
 
@@ -178,7 +181,6 @@ export default function Home() {
 
   const handleLogout = async () => {
     await endSession();
-    setIsAuthenticated(false);
     setUser(null);
     setShowLogoutConfirm(false);
     router.push('/');
@@ -186,9 +188,7 @@ export default function Home() {
 
   // --- Render ---
 
-  if (isAuthenticated === null) return null;
-  if (!isAuthenticated) return <LandingPage />;
-  if (!user) return null;
+  if (!user) return <LandingPage />;
 
   return (
     <Suspense fallback={null}>
@@ -363,7 +363,8 @@ export default function Home() {
                           language={selectedLanguage.id}
                           value={code}
                           onChange={(value) => setCode(value || '')}
-                          theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+                          beforeMount={defineMonacoThemes}
+                          theme={theme === 'dark' ? MONACO_DARK : MONACO_LIGHT}
                           options={{
                             minimap: { enabled: false },
                             fontSize: 13,

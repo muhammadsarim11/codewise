@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Markdown } from './ui/Markdown';
 import { useTheme } from './ThemeProvider';
+import { defineMonacoThemes, MONACO_DARK, MONACO_LIGHT } from '../utils/monacoTheme';
 
 const Editor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -82,7 +83,8 @@ export function AnalysisReport({ data }: { data: AnalysisData }) {
             height="100%"
             language={data.language || 'javascript'}
             value={data.commentedCode || data.originalCode || ''}
-            theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+            beforeMount={defineMonacoThemes}
+            theme={theme === 'dark' ? MONACO_DARK : MONACO_LIGHT}
             options={{
               readOnly: true,
               domReadOnly: true,

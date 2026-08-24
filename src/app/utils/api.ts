@@ -11,27 +11,34 @@ export const API_BASE_URL =
     : 'http://localhost:5000');
 
 /**
- * Shared API client.
- *
- * The session lives in httpOnly cookies, so `withCredentials` is what actually
- * authenticates a request. Callers should not read tokens or set headers.
+ * Shared API client. Callers should not set auth headers themselves — the
+ * interceptor below attaches the session to every request.
  */
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
+const TOKEN_KEY = 'accessToken';
+
+export const storeAccessToken = (token?: string | null) => {
+  if (typeof window === 'undefined' || !token) return;
+  window.localStorage.setItem(TOKEN_KEY, token);
+};
+
 /**
- * Transitional: sessions created before the cookie migration only exist as a
- * bearer token in localStorage. Keep sending it while those are still alive —
- * the API accepts either. Remove once the access-token TTL has fully lapsed.
+ * The API accepts either an httpOnly cookie or a bearer header, and both are
+ * kept live on purpose. The cookie alone is not enough: the frontend (Vercel)
+ * and the API (Render) are different sites, so its SameSite=None cookie is a
+ * third-party cookie — blocked by default in Safari and Firefox, and on its way
+ * out in Chrome. The bearer token is what keeps those browsers signed in.
  */
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window === 'undefined') return config;
 
-  const legacyToken = window.localStorage.getItem('accessToken');
-  if (legacyToken && !config.headers.Authorization) {
-    config.headers.Authorization = `Bearer ${legacyToken}`;
+  const token = window.localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
@@ -59,7 +66,11 @@ const refreshSession = async () => {
   if (!refreshInFlight) {
     refreshInFlight = axios
       .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
-      .then(() => undefined)
+      .then((res) => {
+        // Rotation issues a new pair; the bearer copy has to follow the cookie
+        // or the next request replays a token the API has already retired.
+        storeAccessToken(res.data?.accessToken);
+      })
       .finally(() => {
         refreshInFlight = null;
       });
@@ -70,8 +81,18 @@ const refreshSession = async () => {
 
 export const clearLocalSession = () => {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem('accessToken');
+  window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem('user');
+};
+
+export const readCachedUser = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem('user');
+    return raw ? (JSON.parse(raw) as { name: string; email: string }) : null;
+  } catch {
+    return null;
+  }
 };
 
 api.interceptors.response.use(
