@@ -57,7 +57,7 @@ export default function PublicSharePage() {
           <AlertCircle className="text-critical mx-auto mb-4" size={28} />
           <h2 className="text-ink font-semibold text-[15px] mb-1.5">Report unavailable</h2>
           <p className="text-ink-2 text-[13px] mb-6 leading-relaxed">{error}</p>
-          <Link href="/landing">
+          <Link href="/">
             <Button variant="secondary" className="w-full">
               Go to CodeWise
             </Button>
@@ -72,7 +72,7 @@ export default function PublicSharePage() {
       <header className="flex-none border-b border-border bg-ground z-20">
         <div className="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/landing" className="flex items-center gap-2.5 flex-none">
+            <Link href="/" className="flex items-center gap-2.5 flex-none">
               <div className="size-5 text-accent">
                 <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fillRule="evenodd"></path>

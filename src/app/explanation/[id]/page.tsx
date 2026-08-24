@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import axios from 'axios';
 import api from '../../utils/api';
 import { exportAnalysisPdf } from '../../utils/exportPdf';
 import {
@@ -21,6 +22,10 @@ import { Button } from '../../component/ui/Button';
 import { Dialog } from '../../component/ui/Dialog';
 import { StatusPill } from '../../component/ui/Display';
 import { ThemeToggle } from '../../component/ui/ThemeToggle';
+
+// ~30s of consecutive failures at the 2s poll interval, which comfortably
+// covers a Render cold start without spinning indefinitely.
+const MAX_FAILURES = 15;
 
 interface ExplanationData extends AnalysisData {
   projectId: string;
@@ -42,6 +47,7 @@ export default function ExplanationResult() {
   const [copied, setCopied] = useState(false);
 
   const [isPolling, setIsPolling] = useState(true);
+  const failures = useRef(0);
 
   const fetchExplanation = useCallback(async () => {
     try {
@@ -65,9 +71,23 @@ export default function ExplanationResult() {
         setIsPolling(false);
         setLoading(false);
       }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
+      failures.current = 0;
+    } catch (err: unknown) {
+      const code = axios.isAxiosError(err) ? err.response?.status : undefined;
+
+      if (code === 404 || code === 403) {
         setError('This analysis is not available, or is not yours to view.');
+        setIsPolling(false);
+        setLoading(false);
+        return;
+      }
+
+      // Anything else used to be swallowed, so a server that was down or waking
+      // up left the page spinning forever while it re-requested every 2s. Ride
+      // out a few failures — cold starts are normal here — then give up loudly.
+      failures.current += 1;
+      if (failures.current >= MAX_FAILURES) {
+        setError('Could not reach the server. The analysis may still be running.');
         setIsPolling(false);
         setLoading(false);
       }
@@ -133,7 +153,7 @@ export default function ExplanationResult() {
           <AlertCircle className="text-critical mx-auto mb-4" size={28} />
           <h2 className="text-ink font-semibold text-[15px] mb-1.5">Analysis not found</h2>
           <p className="text-ink-2 text-[13px] mb-6 leading-relaxed">{error}</p>
-          <Button variant="secondary" onClick={() => router.push('/')} className="w-full">
+          <Button variant="secondary" onClick={() => router.push('/dashboard')} className="w-full">
             Back to dashboard
           </Button>
         </div>

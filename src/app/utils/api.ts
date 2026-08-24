@@ -114,7 +114,7 @@ api.interceptors.response.use(
     try {
       await refreshSession();
       return api(original);
-    } catch (refreshError) {
+    } catch {
       // The refresh token is gone or already rotated: the session is over.
       clearLocalSession();
       if (
@@ -124,7 +124,13 @@ api.interceptors.response.use(
       ) {
         window.location.href = '/users/signin';
       }
-      return Promise.reject(refreshError);
+
+      // Reject with the ORIGINAL 401, not the refresh failure. Callers decide
+      // between "your session ended" and "the server is unreachable" by reading
+      // the status, and surfacing the refresh error handed them the wrong one —
+      // the deployed API answers /auth/refresh with 404, so an expired session
+      // arrived looking like an outage.
+      return Promise.reject(error);
     }
   }
 );

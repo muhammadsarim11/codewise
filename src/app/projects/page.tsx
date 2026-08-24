@@ -23,6 +23,7 @@ import {
   Check,
   Book,
   LogOut,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Project {
@@ -58,6 +59,7 @@ export default function ProjectsView() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
+  const [projectsError, setProjectsError] = useState('');
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
@@ -98,11 +100,16 @@ export default function ProjectsView() {
 
   const fetchProjects = async () => {
     setLoadingProjects(true);
+    setProjectsError('');
     try {
       const res = await api.get('/projects/get');
       setProjects(res.data.projects || []);
     } catch (error) {
+      // A failed load used to fall through to the empty state, so an unreachable
+      // API was indistinguishable from an account with no projects — it looked
+      // like the projects had been deleted.
       console.error('Failed to fetch projects', error);
+      setProjectsError('Could not load your projects.');
     } finally {
       setLoadingProjects(false);
     }
@@ -261,7 +268,7 @@ export default function ProjectsView() {
       <header className="w-full border-b border-border bg-ground sticky top-0 z-20">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <button onClick={() => navTo('/')} className="flex items-center gap-2.5">
+            <button onClick={() => navTo('/dashboard')} className="flex items-center gap-2.5">
               <div className="size-5 text-accent">
                 <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fillRule="evenodd"></path>
@@ -273,7 +280,7 @@ export default function ProjectsView() {
 
             <nav className="hidden md:flex items-center gap-1">
               <button
-                onClick={() => navTo('/')}
+                onClick={() => navTo('/dashboard')}
                 className="px-3 py-1.5 rounded-md text-[13px] font-medium text-ink-2 hover:text-ink hover:bg-surface-2 transition-colors duration-150"
               >
                 Dashboard
@@ -422,6 +429,17 @@ export default function ProjectsView() {
 
             {loadingProjects ? (
               <SkeletonRows rows={4} />
+            ) : projectsError ? (
+              <EmptyState
+                icon={<AlertCircle size={22} />}
+                title={projectsError}
+                body="Your projects are safe — this page just could not reach the server. The API sleeps when idle and can take a moment to wake up."
+                action={
+                  <Button variant="secondary" onClick={fetchProjects}>
+                    Try again
+                  </Button>
+                }
+              />
             ) : projects.length === 0 ? (
               <EmptyState
                 icon={<Folder size={22} />}

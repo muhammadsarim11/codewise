@@ -39,7 +39,7 @@ function SignInForm() {
         // session there; the user object is a display cache for the sidebar.
         storeAccessToken(accessToken);
         localStorage.setItem('user', JSON.stringify(user));
-        router.push('/');
+        router.push('/dashboard');
       } else {
         setError('Sign-in failed. Please try again.');
       }

@@ -18,7 +18,7 @@ export function AuthLayout({
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <header className="h-14 flex items-center justify-between px-6 border-b border-border bg-ground">
-        <Link href="/landing" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <div className="size-5 text-accent">
             <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
               <path clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fillRule="evenodd"></path>

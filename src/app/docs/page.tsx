@@ -61,7 +61,7 @@ export default function Documentation() {
     <div className="min-h-screen bg-ground text-ink flex">
       <aside className="w-64 border-r border-border bg-surface hidden md:flex flex-col fixed inset-y-0 z-20">
         <div className="p-5 border-b border-border flex items-center justify-between">
-          <Link href="/landing" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <div className="size-5 text-accent">
               <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fillRule="evenodd"></path>
