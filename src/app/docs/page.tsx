@@ -1,253 +1,274 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  Book, 
-  FileText, 
-  Folder, 
-  Share2, 
+import {
+  Book,
+  Folder,
+  Share2,
   ArrowLeft,
   Zap,
   LayoutTemplate,
   CheckCircle2,
-  Terminal,
-  Search
+  FileDown,
 } from 'lucide-react';
+import { ThemeToggle } from '../component/ui/ThemeToggle';
+
+const NAV = [
+  {
+    label: 'Start here',
+    items: [
+      { href: '#introduction', label: 'Introduction', icon: Book },
+      { href: '#quickstart', label: 'Quick start', icon: Zap },
+    ],
+  },
+  {
+    label: 'Core concepts',
+    items: [
+      { href: '#projects', label: 'Projects', icon: Folder },
+      { href: '#autodocs', label: 'Documentation', icon: LayoutTemplate },
+      { href: '#sharing', label: 'Sharing', icon: Share2 },
+      { href: '#exports', label: 'Exports', icon: FileDown },
+    ],
+  },
+];
+
+const STEPS = [
+  {
+    step: '01',
+    title: 'Create an account',
+    desc: 'Sign up so your analyses are saved and grouped into projects.',
+    href: '/users/signup',
+    cta: 'Sign up',
+  },
+  {
+    step: '02',
+    title: 'Add a file',
+    desc: 'Upload a file up to 200KB, or paste a snippet into the editor.',
+    href: '/',
+    cta: 'Open dashboard',
+  },
+  {
+    step: '03',
+    title: 'Read the report',
+    desc: 'Commented source, logic flow, complexity, and improvements.',
+    href: '/',
+    cta: 'Open dashboard',
+  },
+];
 
 export default function Documentation() {
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-indigo-500/30 selection:text-indigo-200 flex overflow-hidden">
-      
-      {/* Background Glow Effects */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px]" />
-      </div>
-
-      {/* Sidebar Navigation */}
-      <aside className="w-72 border-r border-white/10 bg-[#050505]/80 backdrop-blur-xl hidden md:flex flex-col fixed inset-y-0 z-20">
-        <div className="p-6 border-b border-white/10">
-          <Link href="/" className="flex items-center gap-3 group">
-             <div className="size-8 text-white group-hover:text-indigo-400 transition-colors">
+    <div className="min-h-screen bg-ground text-ink flex">
+      <aside className="w-64 border-r border-border bg-surface hidden md:flex flex-col fixed inset-y-0 z-20">
+        <div className="p-5 border-b border-border flex items-center justify-between">
+          <Link href="/landing" className="flex items-center gap-2.5">
+            <div className="size-5 text-accent">
               <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fillRule="evenodd"></path>
                 <path clipRule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fillRule="evenodd"></path>
               </svg>
             </div>
-            <div>
-                <h1 className="text-sm font-bold tracking-tight text-white font-mono leading-none">CodeWise</h1>
-                <span className="text-[10px] text-zinc-500 font-mono">v1.0.0</span>
+            <div className="leading-none">
+              <p className="text-[14px] font-semibold tracking-tight">CodeWise</p>
+              <span className="text-[11px] text-ink-3">Documentation</span>
             </div>
           </Link>
+          <ThemeToggle />
         </div>
 
-        {/* Mock Search */}
-        <div className="px-6 pt-4">
-            <div className="flex items-center gap-2 bg-zinc-900/50 border border-white/10 rounded-md px-3 py-2 text-sm text-zinc-500">
-                <Search size={14} />
-                <span>Search docs...</span>
-                <span className="ml-auto text-[10px] border border-zinc-700 px-1 rounded">⌘K</span>
+        <nav className="p-3 flex flex-col gap-5 overflow-y-auto flex-1">
+          {NAV.map((group) => (
+            <div key={group.label}>
+              <p className="px-2 text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-2">
+                {group.label}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map(({ href, label, icon: Icon }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    className="flex items-center gap-2.5 px-2.5 py-2 text-[13px] font-medium text-ink-2 hover:text-ink hover:bg-surface-2 rounded-md transition-colors duration-150"
+                  >
+                    <Icon size={15} className="text-ink-3" /> {label}
+                  </a>
+                ))}
+              </div>
             </div>
-        </div>
-
-        <nav className="p-6 space-y-8 overflow-y-auto flex-1 custom-scrollbar">
-          <div>
-            <p className="px-2 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Start Here</p>
-            <div className="space-y-1">
-                <a href="#introduction" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-white bg-white/5 border border-white/5 rounded-lg transition-all"><Book size={16} className="text-indigo-400" /> Introduction</a>
-                <a href="#quickstart" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"><Zap size={16} /> Quick Start</a>
-            </div>
-          </div>
-          
-          <div>
-            <p className="px-2 text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Core Modules</p>
-            <div className="space-y-1">
-                <a href="#projects" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"><Folder size={16} /> Projects</a>
-                <a href="#autodocs" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"><LayoutTemplate size={16} /> Automated Docs</a>
-                <a href="#sharing" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"><Share2 size={16} /> Sharing</a>
-            </div>
-          </div>
+          ))}
         </nav>
+
+        <div className="p-3 border-t border-border">
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-2.5 py-2 text-[13px] text-ink-2 hover:text-ink hover:bg-surface-2 rounded-md transition-colors duration-150"
+          >
+            <ArrowLeft size={14} /> Back to app
+          </Link>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 md:ml-72 relative z-10 h-screen overflow-y-auto scroll-smooth">
-        
-        {/* Mobile Header */}
-        <div className="md:hidden sticky top-0 bg-black/80 backdrop-blur border-b border-white/10 p-4 z-50">
-           <Link href="/" className="flex items-center gap-2 font-mono font-bold text-sm text-zinc-400 hover:text-white">
-            <ArrowLeft size={16} /> Back to Dashboard
+      <main className="flex-1 md:ml-64 min-w-0">
+        <div className="md:hidden sticky top-0 bg-ground border-b border-border px-4 h-14 flex items-center justify-between z-30">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-[13px] font-medium text-ink-2 hover:text-ink"
+          >
+            <ArrowLeft size={15} /> Back to app
           </Link>
+          <ThemeToggle />
         </div>
 
-        <div className="max-w-5xl mx-auto p-6 md:p-16 space-y-24 pb-32">
-          
-          {/* HERO SECTION */}
-          <section id="introduction" className="space-y-6 relative">
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                </span>
-                Documentation Updated
-            </div> */}
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white">
-              Master Your Codebase <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">With AI Intelligence.</span>
+        <div className="max-w-3xl mx-auto px-6 md:px-10 py-12 md:py-16 flex flex-col gap-20 pb-28">
+          <section id="introduction" className="scroll-mt-8">
+            <h1 className="text-[38px] font-semibold tracking-tight leading-[1.1] text-balance">
+              CodeWise documentation
             </h1>
-            <p className="text-xl text-zinc-400 leading-relaxed max-w-2xl">
-              CodeWise isn't just an analyzer; it's your automated documentation architect. Transform raw code into structured, professional insights in seconds.
+            <p className="mt-5 text-lg text-ink-2 leading-relaxed">
+              CodeWise reads a source file and returns a commented version of it alongside a
+              plain-English explanation, its time and space complexity, and concrete suggestions for
+              improving it. This page covers how the pieces fit together.
             </p>
-            
-            <div className="flex flex-wrap gap-4 pt-4">
-                <a href="#quickstart" className="px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 transition-colors">
-                    Get Started
-                </a>
-                <a href="/" className="px-6 py-3 border border-white/20 text-white font-medium rounded-lg hover:bg-white/5 transition-colors">
-                    Open Dashboard
-                </a>
+
+            <div className="flex flex-wrap gap-2.5 pt-7">
+              <a
+                href="#quickstart"
+                className="inline-flex items-center h-9 px-4 bg-accent text-accent-fg text-sm font-medium rounded-md hover:bg-accent-hover transition-colors duration-150"
+              >
+                Quick start
+              </a>
+              <Link
+                href="/"
+                className="inline-flex items-center h-9 px-4 border border-border-strong text-sm font-medium rounded-md hover:bg-surface-2 transition-colors duration-150"
+              >
+                Open the dashboard
+              </Link>
             </div>
           </section>
 
-          {/* QUICK START - STEPS LAYOUT */}
-          <section id="quickstart" className="scroll-mt-24">
-            <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                <span className="bg-indigo-500/20 p-2 rounded-lg text-indigo-400"><Zap size={24}/></span>
-                Quick Start
+          <section id="quickstart" className="scroll-mt-8">
+            <h2 className="text-[26px] font-semibold tracking-tight">Quick start</h2>
+            <p className="mt-2 text-ink-2">Three steps from signing up to a finished report.</p>
+
+            <div className="mt-7 flex flex-col gap-px bg-border border border-border rounded-lg overflow-hidden">
+              {STEPS.map((item) => (
+                <div
+                  key={item.step}
+                  className="bg-ground p-5 flex flex-col sm:flex-row sm:items-center gap-4"
+                >
+                  <span className="font-mono text-[12px] text-accent tabular flex-none w-8">
+                    {item.step}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[15px] font-semibold text-ink">{item.title}</h3>
+                    <p className="mt-1 text-[13px] text-ink-2 leading-relaxed">{item.desc}</p>
+                  </div>
+                  <Link
+                    href={item.href}
+                    className="flex-none text-[13px] font-medium text-accent hover:underline underline-offset-2"
+                  >
+                    {item.cta} →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="projects" className="scroll-mt-8">
+            <h2 className="text-[26px] font-semibold tracking-tight flex items-center gap-2.5">
+              <Folder size={22} className="text-ink-3" /> Projects
             </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { step: "01", title: "Sign Up", desc: "Create your free account to unlock project history.", link: "/users/signup" },
-                    { step: "02", title: "Upload Code", desc: "Paste a snippet or upload a file directly to the dashboard.", link: "/" },
-                    { step: "03", title: "AI Analysis", desc: "Get instant complexity scores, logic flows, and docs.", link: "/" },
-                ].map((item, i) => (
-                    <div key={i} className="group relative bg-zinc-900/40 border border-white/10 p-6 rounded-2xl hover:border-indigo-500/50 hover:bg-zinc-900/60 transition-all duration-300">
-                        <div className="text-4xl font-black text-white/5 group-hover:text-indigo-500/10 mb-4 absolute top-4 right-6 transition-colors">
-                            {item.step}
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                        <p className="text-zinc-400 text-sm mb-4 leading-relaxed">{item.desc}</p>
-                        <Link href={item.link} className="text-indigo-400 text-sm font-medium hover:text-indigo-300 flex items-center gap-1">
-                            Action &rarr;
-                        </Link>
-                    </div>
-                ))}
+            <p className="mt-3 text-ink-2 leading-relaxed">
+              A project is a container for related analyses. Grouping files this way is what makes
+              project-wide documentation possible, since CodeWise reads every analyzed file in the
+              project when it assembles the docs.
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                {
+                  title: 'Analyses are saved',
+                  body: 'Every report stays in your account until you remove it.',
+                },
+                {
+                  title: 'Grouped by project',
+                  body: 'Files analyzed without a project land in a dated catch-all.',
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="flex items-start gap-2.5 bg-surface border border-border p-4 rounded-lg"
+                >
+                  <CheckCircle2 size={17} className="text-good mt-0.5 flex-none" />
+                  <div>
+                    <h4 className="text-[14px] font-medium text-ink">{item.title}</h4>
+                    <p className="text-[13px] text-ink-2 mt-0.5 leading-relaxed">{item.body}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
-          {/* PROJECTS FEATURE */}
-          <section id="projects" className="scroll-mt-24">
-             <div className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
-                {/* Decoration */}
-                <div className="absolute top-0 right-0 bg-white/5 w-64 h-64 rounded-full blur-[80px] pointer-events-none"></div>
+          <section id="autodocs" className="scroll-mt-8">
+            <h2 className="text-[26px] font-semibold tracking-tight flex items-center gap-2.5">
+              <LayoutTemplate size={22} className="text-ink-3" /> Project documentation
+            </h2>
+            <p className="mt-3 text-ink-2 leading-relaxed">
+              From a project, CodeWise assembles sectioned documentation covering every file it has
+              analyzed. Re-run it after adding files and the structure is rebuilt to include them.
+            </p>
 
-                <div className="relative z-10">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
-                        <Folder size={28} className="text-indigo-400" />
-                        Smart Projects
-                    </h2>
-                    <p className="text-zinc-400 text-lg mb-8 max-w-2xl">
-                        Stop losing track of your snippets. Projects act as containers for your analyses, keeping related files organized and accessible.
-                    </p>
+            <ul className="mt-5 flex flex-col gap-2.5">
+              {[
+                'Sections and pages generated from your analyzed files',
+                'Markdown content per file, rendered as a documentation site',
+                'Rebuild at any time to pick up newly analyzed files',
+              ].map((feat) => (
+                <li key={feat} className="flex items-start gap-2.5 text-[14px] text-ink-2">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-accent flex-none" />
+                  {feat}
+                </li>
+              ))}
+            </ul>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="flex items-start gap-3 bg-black/40 p-4 rounded-xl border border-white/5">
-                            <CheckCircle2 size={20} className="text-emerald-500 mt-0.5" />
-                            <div>
-                                <h4 className="text-white font-medium">Unlimited Workspace</h4>
-                                <p className="text-zinc-500 text-sm">Create as many projects as you need.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3 bg-black/40 p-4 rounded-xl border border-white/5">
-                            <CheckCircle2 size={20} className="text-emerald-500 mt-0.5" />
-                            <div>
-                                <h4 className="text-white font-medium">Auto-Save History</h4>
-                                <p className="text-zinc-500 text-sm">Every analysis is stored automatically.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-             </div>
+            <p className="mt-6 inline-flex items-center gap-1.5 bg-surface border border-border rounded-md px-3 py-2 text-[12px] font-mono text-ink-2">
+              Projects <span className="text-ink-3">›</span> pick a project{' '}
+              <span className="text-ink-3">›</span>{' '}
+              <span className="text-ink">Documentation</span>
+            </p>
           </section>
 
-          {/* AUTOMATED DOCS (HIGHLIGHT) */}
-          <section id="autodocs" className="scroll-mt-24">
-            <div className="flex flex-col md:flex-row gap-12 items-center">
-                <div className="flex-1 space-y-6">
-                    <h2 className="text-3xl font-bold flex items-center gap-3">
-                        <span className="bg-indigo-500/20 p-2 rounded-lg text-indigo-400"><LayoutTemplate size={24}/></span>
-                        Automated Documentation
-                    </h2>
-                    <p className="text-zinc-400 text-lg leading-relaxed">
-                        The crown jewel of CodeWise. Generate a full static documentation site for your project with a single click.
-                    </p>
-                    <ul className="space-y-4">
-                        {[
-                            "AI-Structured Hierarchy (Core, API, Utils)",
-                            "Deep-Dive Logic Explanation",
-                            "Export to PDF & Markdown"
-                        ].map((feat, i) => (
-                            <li key={i} className="flex items-center gap-3 text-zinc-300">
-                                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
-                                {feat}
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="pt-4">
-                        <div className="inline-block bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-xs font-mono text-zinc-400">
-                            Project &gt; Docs Tab &gt; <span className="text-white">Generate Docs</span>
-                        </div>
-                    </div>
-                </div>
-                
-                {/* Visual Representation */}
-                <div className="flex-1 w-full">
-                    <div className="relative bg-[#0F0F0F] border border-zinc-800 rounded-xl p-6 shadow-2xl rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <div className="absolute -top-3 -left-3 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded shadow-lg">NEW FEATURE</div>
-                        <div className="space-y-3 opacity-60">
-                            <div className="h-4 w-1/3 bg-zinc-700 rounded"></div>
-                            <div className="h-2 w-full bg-zinc-800 rounded"></div>
-                            <div className="h-2 w-5/6 bg-zinc-800 rounded"></div>
-                            <div className="h-2 w-4/6 bg-zinc-800 rounded"></div>
-                        </div>
-                        <div className="mt-6 flex gap-3">
-                            <div className="h-8 w-24 bg-zinc-800 rounded"></div>
-                            <div className="h-8 w-24 bg-indigo-900/30 border border-indigo-500/30 rounded"></div>
-                        </div>
-                    </div>
-                </div>
+          <section id="sharing" className="scroll-mt-8">
+            <h2 className="text-[26px] font-semibold tracking-tight flex items-center gap-2.5">
+              <Share2 size={22} className="text-ink-3" /> Sharing
+            </h2>
+            <p className="mt-3 text-ink-2 leading-relaxed">
+              Any analysis can be published as a read-only link. Anyone holding it can read that one
+              report; they cannot edit it, and they cannot see anything else in your account.
+              Analyses are private until you create a link.
+            </p>
+
+            <div className="mt-5 bg-surface border border-border rounded-lg p-4 flex items-center justify-between gap-4">
+              <code className="text-[12px] font-mono text-ink-2 truncate">
+                https://thecodewise.vercel.app/share/x9s8d…
+              </code>
+              <Share2 size={14} className="text-ink-3 flex-none" />
             </div>
           </section>
 
-          {/* SHARING SECTION */}
-          <section id="sharing" className="scroll-mt-24">
-            <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-4">Sharing & Collaboration</h2>
-            <div className="bg-zinc-900/20 border border-white/10 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1">
-                    <p className="text-zinc-400 mb-6">
-                        Need to explain a complex function to a teammate? Generate a public link for any analysis report.
-                    </p>
-                    <div className="bg-black border border-zinc-800 rounded-lg p-4 flex items-center justify-between gap-4 max-w-md">
-                        <code className="text-xs text-indigo-300 truncate">https://codewise.app/share/x9s8d...</code>
-                        <button className="text-zinc-500 hover:text-white"><Share2 size={14}/></button>
-                    </div>
-                </div>
-                <div className="flex-1 flex justify-center">
-                    <div className="bg-indigo-500/10 p-6 rounded-full border border-indigo-500/20">
-                        <Share2 size={48} className="text-indigo-400" />
-                    </div>
-                </div>
-            </div>
+          <section id="exports" className="scroll-mt-8">
+            <h2 className="text-[26px] font-semibold tracking-tight flex items-center gap-2.5">
+              <FileDown size={22} className="text-ink-3" /> Exports
+            </h2>
+            <p className="mt-3 text-ink-2 leading-relaxed">
+              Individual analyses export as PDF. Project documentation exports as either PDF or a
+              single Markdown file, which is the easier one to commit back into a repository.
+            </p>
           </section>
-
         </div>
 
-        <footer className="border-t border-white/5 py-12 text-center">
-          <p className="text-zinc-600 text-sm font-mono mb-2">Built for Developers, by Developers.</p>
-          <p className="text-zinc-700 text-xs">© 2026 CodeWise Inc. All rights reserved.</p>
+        <footer className="border-t border-border py-10 px-6 text-center">
+          <p className="text-[13px] text-ink-3">CodeWise © 2026</p>
         </footer>
-
       </main>
     </div>
   );

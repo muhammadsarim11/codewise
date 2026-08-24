@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
+import { Dialog } from './ui/Dialog';
+import { Button } from './ui/Button';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -9,10 +10,16 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
+/**
+ * Confirmation prompt, now a thin wrapper over the shared Dialog rather than
+ * its own overlay — it inherits the focus trap, Escape handling, and scroll
+ * lock that the standalone version never had.
+ */
 export default function ConfirmDialog({
   open,
   title,
@@ -20,40 +27,31 @@ export default function ConfirmDialog({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   danger = false,
+  loading = false,
   onConfirm,
-  onCancel
+  onCancel,
 }: ConfirmDialogProps) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4">
-      <div className="bg-[#111] border border-[#333] rounded-lg w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 duration-150">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`p-2 rounded-full border ${danger ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-[#222] border-[#333] text-white'}`}>
-            <AlertTriangle size={16} />
-          </div>
-          <h3 className="text-white font-medium">{title}</h3>
-        </div>
-        <p className="text-sm text-[#888] mb-6">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm text-[#888] hover:text-white transition-colors"
-          >
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      title={title}
+      description={message}
+      footer={
+        <>
+          <Button variant="ghost" size="sm" onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={danger ? 'danger' : 'primary'}
+            size="sm"
+            loading={loading}
             onClick={onConfirm}
-            className={`px-4 py-2 text-sm rounded font-medium transition-colors ${
-              danger
-                ? 'bg-red-600 text-white hover:bg-red-500'
-                : 'bg-white text-black hover:bg-gray-200'
-            }`}
           >
             {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </>
+      }
+    />
   );
 }

@@ -2,24 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Book, 
-  ChevronRight, 
-  FileText, 
-  ArrowLeft, 
-  Cpu, 
+  Book,
+  ChevronRight,
+  FileText,
+  ArrowLeft,
+  Cpu,
   Loader2,
   Menu,
   X,
   FileType,
   FileCode,
   ArrowRight,
-  RefreshCcw // New Icon for Regenerate
+  RefreshCcw,
 } from 'lucide-react';
-import { API_BASE_URL } from '@/app/utils/api'; 
-import ReactMarkdown from 'react-markdown'; 
+import api from '@/app/utils/api';
+import { Button } from '@/app/component/ui/Button';
+import { Markdown } from '@/app/component/ui/Markdown';
+import { ThemeToggle } from '@/app/component/ui/ThemeToggle';
+import { cn } from '@/app/utils/cn';
 
 export default function ProjectDocs() {
   const params = useParams();
@@ -41,12 +43,8 @@ export default function ProjectDocs() {
   const fetchDocs = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      
-      const res = await axios.get(`${API_BASE_URL}/projects/${projectId}/docs`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const res = await api.get(`/projects/${projectId}/docs`);
+
       if (res.data.success && res.data.docs) {
         setDocs(res.data.docs);
         const firstSection = res.data.docs.structure?.sections?.[0];
@@ -54,8 +52,8 @@ export default function ProjectDocs() {
           setActivePage(firstSection.pages[0]);
         }
       }
-    } catch (error) {
-      console.log("Docs not found, ready to generate.");
+    } catch {
+      // A 404 here just means documentation has not been generated yet.
     } finally {
       setLoading(false);
     }
@@ -64,73 +62,76 @@ export default function ProjectDocs() {
   const handleGenerate = async () => {
     try {
       setGenerating(true);
-      const token = localStorage.getItem('accessToken');
-      
-      const res = await axios.post(`${API_BASE_URL}/projects/${projectId}/docs/generate`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.post(`/projects/${projectId}/docs/generate`, {});
 
       if (res.data.success) {
         setDocs(res.data.docs);
         const firstSection = res.data.docs.structure?.sections?.[0];
-        // Agar pehle se page select nahi tha, to first page select karo
         if (firstSection?.pages?.[0] && !activePage) {
           setActivePage(firstSection.pages[0]);
         }
-        // Agar active page tha, to content refresh ho jayega automatically
-        toast.success("Documentation generated");
+        toast.success('Documentation generated');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to generate docs");
+      toast.error(error.response?.data?.message || 'Could not generate documentation');
     } finally {
       setGenerating(false);
     }
   };
 
-  // --- DOWNLOAD HANDLERS ---
   const handleDownloadPDF = async () => {
     if (!docs || !docs.structure) return;
-    const { default: jsPDF } = await import("jspdf");
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    const maxLineWidth = pageWidth - (margin * 2);
+    const maxLineWidth = pageWidth - margin * 2;
     let yPos = 20;
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(22);
-    doc.text(docs.title || "Project Documentation", margin, yPos);
+    doc.text(docs.title || 'Project Documentation', margin, yPos);
     yPos += 10;
     doc.setLineWidth(0.5);
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 15;
 
     docs.structure.sections.forEach((section: any) => {
-      if (yPos > 260) { doc.addPage(); yPos = 20; }
-      doc.setFont("helvetica", "bold");
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(16);
-      doc.setTextColor(100); 
+      doc.setTextColor(100);
       doc.text(section.title.toUpperCase(), margin, yPos);
       yPos += 10;
-      doc.setTextColor(0); 
+      doc.setTextColor(0);
 
       section.pages.forEach((page: any) => {
-        if (yPos > 250) { doc.addPage(); yPos = 20; }
-        doc.setFont("helvetica", "bold");
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(14);
         doc.text(page.title, margin, yPos);
         yPos += 8;
-        doc.setFont("helvetica", "normal");
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
-        const cleanText = page.description.replace(/\*\*/g, "").replace(/#/g, "");
-        const lines = doc.splitTextToSize(cleanText || "", maxLineWidth);
-        if (yPos + (lines.length * 7) > 280) { doc.addPage(); yPos = 20; }
+        const cleanText = page.description.replace(/\*\*/g, '').replace(/#/g, '');
+        const lines = doc.splitTextToSize(cleanText || '', maxLineWidth);
+        if (yPos + lines.length * 7 > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
         doc.text(lines, margin, yPos);
-        yPos += (lines.length * 7) + 10; 
+        yPos += lines.length * 7 + 10;
       });
       yPos += 5;
     });
-    const safeTitle = (docs.title || "docs").replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+    const safeTitle = (docs.title || 'docs').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     doc.save(`${safeTitle}.pdf`);
   };
 
@@ -150,7 +151,7 @@ export default function ProjectDocs() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    const safeTitle = (docs.title || "docs").replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const safeTitle = (docs.title || 'docs').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     link.download = `${safeTitle}.md`;
     document.body.appendChild(link);
     link.click();
@@ -158,269 +159,205 @@ export default function ProjectDocs() {
     URL.revokeObjectURL(url);
   };
 
-  // --- RENDER ---
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="animate-spin text-white w-8 h-8" />
+      <div className="min-h-screen bg-ground flex items-center justify-center">
+        <Loader2 className="animate-spin text-accent w-6 h-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row overflow-hidden font-sans">
-        
-      {/* --- MOBILE HEADER (FIXED) --- */}
-      <div className="md:hidden border-b border-[#333] p-4 flex justify-between items-center bg-black/90 backdrop-blur z-30 sticky top-0 h-16">
-         <div className="flex items-center gap-3">
-            <button 
-                onClick={() => router.push('/projects')}
-                className="text-[#888] hover:text-white p-1 rounded-md active:bg-[#222]"
-            >
-                <ArrowLeft size={20} />
-            </button>
-            <span className="font-mono font-bold text-sm truncate max-w-[150px]">
-                {docs?.title || 'Documentation'}
-            </span>
-         </div>
-         <button 
+    <div className="min-h-screen bg-ground text-ink flex flex-col md:flex-row">
+      {/* Mobile bar */}
+      <div className="md:hidden border-b border-border px-4 h-14 flex justify-between items-center bg-ground sticky top-0 z-30">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            onClick={() => router.push('/projects')}
+            aria-label="Back to projects"
+            className="p-1.5 rounded-md text-ink-3 hover:text-ink hover:bg-surface-2 transition-colors duration-150"
+          >
+            <ArrowLeft size={17} />
+          </button>
+          <span className="text-sm font-semibold truncate">{docs?.title || 'Documentation'}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-[#ccc] hover:text-white"
-         >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-         </button>
+            aria-label={mobileMenuOpen ? 'Close contents' : 'Open contents'}
+            className="p-1.5 rounded-md text-ink-3 hover:text-ink hover:bg-surface-2 transition-colors duration-150"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </div>
 
-      {/* --- BACKDROP OVERLAY --- */}
       {mobileMenuOpen && (
-        <div 
-            className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
+        <div
+          className="fixed inset-0 bg-ink/25 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* --- SIDEBAR NAVIGATION (ALWAYS VISIBLE) --- */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-[#050505] border-r border-[#333] 
-        transform transition-transform duration-300 ease-in-out 
-        md:relative md:translate-x-0 flex flex-col shadow-2xl md:shadow-none
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        {/* Sidebar Header */}
-        <div className="p-6 border-b border-[#333] flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-                <button 
-                    onClick={() => router.push(`/projects`)}
-                    className="flex items-center gap-2 text-[#888] hover:text-white text-xs font-mono transition-colors"
-                >
-                    <ArrowLeft size={14} /> Back to Projects
-                </button>
-                <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-[#666] hover:text-white">
-                    <X size={18} />
-                </button>
+      {/* Contents rail */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-border',
+          'transform transition-transform duration-150 ease-out',
+          'md:sticky md:top-0 md:h-screen md:translate-x-0 flex flex-col',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="p-5 border-b border-border flex flex-col gap-3">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => router.push('/projects')}
+              className="inline-flex items-center gap-1.5 text-[13px] text-ink-2 hover:text-ink transition-colors duration-150"
+            >
+              <ArrowLeft size={14} /> Projects
+            </button>
+            <div className="flex items-center gap-1">
+              <span className="hidden md:block">
+                <ThemeToggle />
+              </span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close contents"
+                className="md:hidden text-ink-3 hover:text-ink"
+              >
+                <X size={17} />
+              </button>
             </div>
-            <h2 className="font-bold text-lg leading-tight line-clamp-2 text-white">
-                {docs?.title || "Project Documentation"}
-            </h2>
+          </div>
+          <h2 className="font-semibold text-[15px] leading-snug line-clamp-2 text-ink">
+            {docs?.title || 'Project documentation'}
+          </h2>
         </div>
 
-        {/* Sidebar Content (Only if docs exist) */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
-            {docs && docs.structure && docs.structure.sections.map((section: any, idx: number) => (
-                <div key={idx}>
-                    <h3 className="text-[10px] font-bold text-[#555] uppercase tracking-widest mb-3 px-2">
-                        {section.title}
-                    </h3>
-                    <div className="space-y-1">
-                        {section.pages.map((page: any) => (
-                            <button
-                                key={page.id}
-                                onClick={() => {
-                                    setActivePage(page);
-                                    setMobileMenuOpen(false);
-                                }}
-                                className={`w-full text-left px-3 py-2.5 rounded text-sm transition-all flex items-center justify-between group ${
-                                    activePage?.id === page.id 
-                                    ? 'bg-[#111] text-white border border-[#333] shadow-sm' 
-                                    : 'text-[#888] hover:bg-[#111] hover:text-gray-300'
-                                }`}
-                            >
-                                <span className="truncate pr-2">{page.title}</span>
-                                {activePage?.id === page.id && <ChevronRight size={14} className="text-white shrink-0" />}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            ))}
-            
-            {!docs && (
-                <div className="text-center mt-10 px-4">
-                    <p className="text-[#444] text-xs font-mono">No structure available. Generate documentation to view sections.</p>
-                </div>
-            )}
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-5">
+          {docs?.structure?.sections?.map((section: any, idx: number) => (
+            <div key={idx}>
+              <h3 className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-2 px-2">
+                {section.title}
+              </h3>
+              <div className="flex flex-col gap-0.5">
+                {section.pages.map((page: any) => (
+                  <button
+                    key={page.id}
+                    onClick={() => {
+                      setActivePage(page);
+                      setMobileMenuOpen(false);
+                    }}
+                    aria-current={activePage?.id === page.id ? 'page' : undefined}
+                    className={cn(
+                      'w-full text-left px-2.5 py-2 rounded-md text-[13px]',
+                      'transition-colors duration-150 flex items-center justify-between gap-2',
+                      activePage?.id === page.id
+                        ? 'bg-accent-soft text-accent font-medium'
+                        : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                    )}
+                  >
+                    <span className="truncate">{page.title}</span>
+                    {activePage?.id === page.id && (
+                      <ChevronRight size={13} className="flex-none" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {!docs && (
+            <p className="text-[13px] text-ink-3 px-2 mt-4 leading-relaxed">
+              Nothing here yet. Generate documentation to build the contents.
+            </p>
+          )}
         </div>
 
-        {/* --- SIDEBAR FOOTER (ACTIONS) --- */}
         {docs && (
-            <div className="p-4 border-t border-[#333] flex flex-col gap-3 bg-[#080808]">
-                
-                {/* REGENERATE BUTTON ROW (NEW) */}
-                <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-[#666] font-mono uppercase tracking-wider">Sync Docs</p>
-                    <button 
-                        onClick={handleGenerate}
-                        disabled={generating}
-                        className="flex items-center gap-1.5 text-[10px] font-mono text-indigo-400 hover:text-indigo-300 transition-colors disabled:opacity-50"
-                        title="Update documentation with new files"
-                    >
-                        <RefreshCcw size={12} className={generating ? "animate-spin" : ""} /> 
-                        {generating ? "UPDATING..." : "REGENERATE"}
-                    </button>
-                </div>
+          <div className="p-3 border-t border-border flex flex-col gap-3">
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              title="Rebuild documentation, including newly analyzed files"
+              className="flex items-center justify-between text-[12px] text-ink-2 hover:text-ink transition-colors duration-150 disabled:opacity-50 px-1"
+            >
+              <span>Rebuild from latest files</span>
+              <RefreshCcw size={13} className={generating ? 'animate-spin' : ''} />
+            </button>
 
-                <div className="w-full h-px bg-[#222]"></div>
-
-                {/* EXPORT BUTTONS ROW */}
-                <div>
-                    <p className="text-[10px] text-[#666] font-mono mb-2 uppercase tracking-wider">Export</p>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={handleDownloadPDF}
-                            className="flex-1 flex items-center justify-center gap-2 py-2 rounded border border-[#333] bg-[#111] text-[#ccc] hover:text-white hover:border-white text-xs font-mono transition-all"
-                            title="Download as PDF"
-                        >
-                            <FileText size={14} /> PDF
-                        </button>
-                        <button 
-                            onClick={handleDownloadMD}
-                            className="flex-1 flex items-center justify-center gap-2 py-2 rounded border border-[#333] bg-[#111] text-[#ccc] hover:text-white hover:border-white text-xs font-mono transition-all"
-                            title="Download as Markdown"
-                        >
-                            <FileType size={14} /> MD
-                        </button>
-                    </div>
-                </div>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={handleDownloadPDF} className="flex-1">
+                <FileText size={14} /> PDF
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleDownloadMD} className="flex-1">
+                <FileType size={14} /> Markdown
+              </Button>
             </div>
+          </div>
         )}
       </aside>
 
-      {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 h-[calc(100vh-64px)] md:h-screen overflow-y-auto bg-black relative scroll-smooth">
-         <div 
-            className="absolute inset-0 z-0 pointer-events-none opacity-20" 
-            style={{
-                backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)',
-                backgroundSize: '40px 40px'
-            }}
-         />
+      <main className="flex-1 min-w-0">
+        {docs && activePage ? (
+          <article className="max-w-3xl mx-auto px-6 md:px-10 py-10 md:py-14">
+            <header className="mb-8 pb-6 border-b border-border">
+              <h1 className="text-3xl font-semibold tracking-tight text-ink text-balance">
+                {activePage.title}
+              </h1>
+            </header>
 
-         <div className="relative z-10 w-full h-full">
-            {docs && activePage ? (
-                // --- VIEW: DOCUMENTATION CONTENT ---
-                <div className="max-w-4xl mx-auto p-6 md:p-12 lg:p-16 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-                    <div className="mb-8 pb-8 border-b border-[#333]">
-                        {/* <span className="text-xs font-mono text-indigo-400 mb-2 block">
-                            PAGE ID: {activePage.id.slice(-6).toUpperCase()}
-                        </span> */}
-                        <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight">
-                            {activePage.title}
-                        </h1>
-                    </div>
-                    
-                    {/* Markdown Content - STYLED */}
-                    <div className="text-[#bbb] space-y-6">
-                        <ReactMarkdown
-                            remarkPlugins={[]} 
-                            components={{
-                                h1: ({node, ...props}) => <h1 className="text-3xl font-bold text-white mt-10 mb-6 border-b border-gray-800 pb-2" {...props} />,
-                                h2: ({node, ...props}) => <h2 className="text-2xl font-semibold text-white mt-10 mb-4" {...props} />,
-                                h3: ({node, ...props}) => <h3 className="text-xl font-medium text-indigo-400 mt-8 mb-3" {...props} />,
-                                p: ({node, ...props}) => <p className="leading-relaxed mb-6 text-base" {...props} />,
-                                ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-6 space-y-2 text-gray-300" {...props} />,
-                                ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-gray-300" {...props} />,
-                                li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                                blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-4 italic text-gray-400 my-6 bg-[#111] p-4 rounded-r" {...props} />,
-                                code: ({node, ...props}) => {
-                                    const match = /language-(\w+)/.exec(props.className || '')
-                                    const isBlock = match || String(props.children).includes('\n');
-                                    return isBlock ? (
-                                        <div className="relative my-6 rounded-lg overflow-hidden border border-[#333] bg-[#0a0a0a]">
-                                            <div className="flex items-center justify-between px-4 py-2 bg-[#111] border-b border-[#333]">
-                                                <span className="text-xs font-mono text-[#666]">code</span>
-                                            </div>
-                                            <pre className="p-4 overflow-x-auto text-sm font-mono text-gray-300">
-                                                <code {...props} />
-                                            </pre>
-                                        </div>
-                                    ) : (
-                                        <code className="bg-[#1a1a1a] text-indigo-300 px-1.5 py-0.5 rounded text-sm font-mono border border-[#333]" {...props} />
-                                    )
-                                },
-                                strong: ({node, ...props}) => <strong className="text-white font-bold" {...props} />,
-                                a: ({node, ...props}) => <a className="text-indigo-400 hover:underline hover:text-indigo-300 transition-colors" {...props} />,
-                                hr: ({node, ...props}) => <hr className="border-[#333] my-8" {...props} />
-                            }}
-                        >
-                            {/* FORCE NEWLINES */}
-                            {activePage.description ? activePage.description.replace(/\\n/g, '\n') : ''}
-                        </ReactMarkdown>
-                    </div>
+            <Markdown variant="doc">
+              {activePage.description ? activePage.description.replace(/\\n/g, '\n') : ''}
+            </Markdown>
 
-                    <div className="mt-16 pt-8 border-t border-[#333]">
-                        <button 
-                            onClick={() => router.push(`/explanation/${activePage.id}`)}
-                            className="w-full bg-[#111] border border-[#333] rounded p-4 flex items-center justify-between group hover:border-[#666] hover:bg-[#161616] transition-all cursor-pointer"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-black rounded border border-[#333] group-hover:border-[#555] transition-colors">
-                                    <FileCode size={20} className="text-indigo-400" />
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-sm text-white font-mono font-medium group-hover:text-indigo-300 transition-colors">
-                                        View Full Analysis
-                                    </p>
-                                    <p className="text-xs text-[#666] mt-0.5 hidden sm:block">
-                                        See original code, complexity score & improvements
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-[#444] group-hover:text-white transition-colors">
-                                <span className="text-xs font-mono font-medium">OPEN REPORT</span>
-                                <ArrowRight size={16} />
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                // --- VIEW: EMPTY STATE ---
-                <div className="flex flex-col items-center justify-center h-full min-h-[80vh] text-center p-6 animate-in zoom-in duration-500">
-                    <div className="bg-[#111] p-5 rounded-full inline-block border border-[#333] mb-6 shadow-xl">
-                        <Book className="w-12 h-12 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white mb-3">Generate Documentation</h1>
-                    <p className="text-[#888] max-w-md mb-8 leading-relaxed">
-                        Transform your analyzed code into a professional, structured documentation site using AI.
+            <div className="mt-14 pt-8 border-t border-border">
+              <button
+                onClick={() => router.push(`/explanation/${activePage.id}`)}
+                className="w-full bg-surface border border-border rounded-lg p-4 flex items-center justify-between gap-4 group hover:border-border-strong transition-colors duration-150 text-left"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <span className="p-2.5 bg-ground rounded-md border border-border flex-none">
+                    <FileCode size={18} className="text-ink-3" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-ink">View the full analysis</p>
+                    <p className="text-[12px] text-ink-3 mt-0.5 hidden sm:block">
+                      Original source, complexity, and suggested improvements
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <button 
-                            onClick={() => router.push('/projects')} 
-                            className="px-6 py-3 rounded border border-[#333] text-[#888] hover:text-white hover:border-white transition-all text-sm font-mono font-medium"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            onClick={handleGenerate}
-                            disabled={generating}
-                            className="flex items-center justify-center gap-2 px-8 py-3 rounded bg-white text-black font-bold hover:bg-gray-200 transition-all disabled:opacity-50 text-sm font-mono shadow-lg shadow-white/10"
-                        >
-                            {generating ? <Loader2 className="animate-spin w-4 h-4" /> : <Cpu className="w-4 h-4" />}
-                            {generating ? 'Generating...' : 'Generate Docs'}
-                        </button>
-                    </div>
+                  </div>
                 </div>
-            )}
-         </div>
+                <ArrowRight
+                  size={16}
+                  className="text-ink-3 group-hover:text-ink transition-colors duration-150 flex-none"
+                />
+              </button>
+            </div>
+          </article>
+        ) : (
+          <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-6 py-16">
+            <span className="p-4 rounded-full bg-surface border border-border mb-5">
+              <Book className="w-7 h-7 text-ink-3" />
+            </span>
+            <h1 className="text-xl font-semibold tracking-tight text-ink mb-2">
+              No documentation yet
+            </h1>
+            <p className="text-[13px] text-ink-2 max-w-sm mb-7 leading-relaxed">
+              CodeWise will read every analyzed file in this project and assemble structured,
+              sectioned documentation from them.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <Button variant="secondary" onClick={() => router.push('/projects')}>
+                Back to projects
+              </Button>
+              <Button variant="primary" onClick={handleGenerate} loading={generating}>
+                {!generating && <Cpu size={15} />}
+                {generating ? 'Generating…' : 'Generate documentation'}
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

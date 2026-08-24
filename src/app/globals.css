@@ -1,26 +1,161 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Dark mode is driven by a `.dark` class on <html>, set before paint by the
+  inline script in layout.tsx. That collapses the three possible states —
+  explicit light, explicit dark, and "follow the system" — into one class the
+  CSS can rely on, so no rule needs a media query.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  The palette is declared directly as Tailwind's own `--color-*` names, and the
+  dark block overrides those same names.
+
+  The tempting alternative — semantic aliases like `--surface` with
+  `@theme { --color-surface: var(--surface) }` — looks tidier but does not
+  survive a theme swap: the utility keeps its original computed colour even
+  though the variable underneath it updates correctly. One set of names, no
+  indirection, no stale utilities.
+*/
+@theme {
+  /* Surfaces. Neutrals carry a slight cool bias toward the accent so the greys
+     read as chosen rather than defaulted. */
+  --color-ground: #ffffff;
+  --color-surface: #f7f8fa;
+  --color-surface-2: #eef1f5;
+
+  --color-border: #e2e6ec;
+  --color-border-strong: #cbd2dc;
+
+  /* Text, darkest to lightest */
+  --color-ink: #0e1219;
+  --color-ink-2: #4a5361;
+  /* 5.06:1 on ground, 4.76:1 on surface -- the previous #7c8698 was 3.67:1
+     and failed AA for the small text this tier is used for. */
+  --color-ink-3: #666f80;
+
+  /* One accent, used for action and active state only */
+  --color-accent: #2e5288;
+  --color-accent-hover: #26456f;
+  --color-accent-soft: #eaf0f8;
+  --color-accent-fg: #ffffff;
+
+  /* Semantic state, deliberately separate from the accent and muted rather
+     than saturated: a formal tool signals state without alarming anyone. */
+  --color-critical: #9e2b25;
+  --color-critical-fg: #ffffff;
+  --color-critical-soft: #fbedec;
+  --color-warn: #8a6318;
+  --color-warn-soft: #fbf4e6;
+  --color-good: #2c6a4f;
+  --color-good-soft: #eaf4ef;
+
+  --color-ring: #2e5288;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  --shadow-card: 0 1px 2px rgba(14, 18, 25, 0.05);
+  --shadow-float: 0 1px 2px rgba(14, 18, 25, 0.04), 0 8px 24px -12px rgba(14, 18, 25, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Not pure black: pure black crushes elevation, so raised surfaces have
+     nowhere to go. */
+  --color-ground: #0c0f14;
+  --color-surface: #131820;
+  --color-surface-2: #1a212b;
+
+  --color-border: #232c38;
+  --color-border-strong: #33404f;
+
+  /* Not pure white either — reduces halation on dark grounds. */
+  --color-ink: #e7ebf0;
+  --color-ink-2: #a3aebd;
+  /* 5.25:1 on ground, 4.87:1 on surface. */
+  --color-ink-3: #7a8797;
+
+  /* Lifted: #2e5288 fails contrast against a dark ground. */
+  --color-accent: #7ca6de;
+  --color-accent-hover: #9cbeea;
+  --color-accent-soft: #16202e;
+  --color-accent-fg: #0c0f14;
+
+  /* Dark's critical is a light red, so its foreground has to flip too:
+     white-on-#e08a84 sits near 2:1 and fails badly. */
+  --color-critical: #e08a84;
+  --color-critical-fg: #0c0f14;
+  --color-critical-soft: #241618;
+  --color-warn: #d9ae62;
+  --color-warn-soft: #231c10;
+  --color-good: #6fbf95;
+  --color-good-soft: #10201a;
+
+  --color-ring: #7ca6de;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ---------------------------------------------------------------- base */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  /* Was `Arial, Helvetica, sans-serif`, which silently overrode the Inter that
+     layout.tsx loads — the whole app rendered in Arial. */
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One visible focus treatment for the whole app; there was none before. */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-ink);
+}
+
+/* Digits that sit in columns should line up. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbars, previously restyled ad hoc inside three separate components. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 5px;
+  border: 2px solid var(--color-ground);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-3);
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

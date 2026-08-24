@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
+import { ThemeProvider, themeInitScript } from "./component/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -24,25 +25,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${jetbrains.variable} bg-black text-white min-h-screen antialiased selection:bg-white selection:text-black`}>
-        {/* You could add a Navbar here later */}
-        <main className="flex flex-col min-h-screen">
-          {children}
-        </main>
-        <Toaster
-          theme="dark"
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: '#111111',
-              border: '1px solid #333333',
-              color: '#ffffff',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '13px'
-            }
-          }}
-        />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Sets the theme class before first paint so the page never flashes
+            the wrong ground colour. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body
+        className={`${inter.variable} ${jetbrains.variable} bg-ground text-ink min-h-screen antialiased`}
+      >
+        <ThemeProvider>
+          <main className="flex flex-col min-h-screen">
+            {children}
+          </main>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              classNames: {
+                toast:
+                  'bg-surface border border-border text-ink shadow-float rounded-md text-sm',
+                description: 'text-ink-2',
+                actionButton: 'bg-accent text-accent-fg',
+                cancelButton: 'bg-surface-2 text-ink-2',
+              },
+            }}
+          />
+        </ThemeProvider>
         <Analytics />
         <SpeedInsights />
       </body>

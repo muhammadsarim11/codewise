@@ -3,9 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/api';
-import { Loader2, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import api from '../../utils/api';
+import { AuthLayout, FormError, FormSuccess } from '../../component/AuthLayout';
+import { Button } from '../../component/ui/Button';
+import { Input } from '../../component/ui/Field';
 
 function SignInForm() {
   const router = useRouter();
@@ -17,9 +18,8 @@ function SignInForm() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    // Check if redirected from registration
     if (searchParams.get('registered') === 'true') {
-      setSuccess('Account created successfully! Please sign in.');
+      setSuccess('Account created. Sign in to continue.');
     }
   }, [searchParams]);
 
@@ -30,123 +30,91 @@ function SignInForm() {
     setSuccess('');
 
     try {
-      // Backend expects: { email, password }
-      const response = await axios.post(`${API_BASE_URL}/signin`, {
-        email,
-        password
-      });
+      const response = await api.post('/signin', { email, password });
+      const { user } = response.data;
 
-      
-      const { accessToken, user } = response.data;
-      console.log("accessToken", accessToken);
-
-      if (accessToken) {
-        // Store token and user details
-        localStorage.setItem('accessToken', accessToken);
+      if (user) {
+        // The session itself is an httpOnly cookie set by the API. This copy is
+        // only a display cache for the sidebar; it never authenticates a request.
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // Force a hard refresh or router push to dashboard
-        router.push('/'); 
+        router.push('/');
       } else {
-        setError('Login failed: No access token received');
+        setError('Sign-in failed. Please try again.');
       }
-
     } catch (err: any) {
-      // Backend returns { success: false, error: "..." }
-      setError(err.response?.data?.error || 'Invalid email or password');
+      setError(err.response?.data?.error || 'That email and password do not match.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-6">
-      <div className="w-full max-w-md space-y-8">
-        
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
-          <p className="mt-2 text-sm text-gray-400">
-            Sign in to your CodeWise account
-          </p>
-        </div>
-
-        <div className="bg-[#0A0A0A] border border-[#333] rounded-xl p-8 shadow-2xl">
-          <form onSubmit={handleLogin} className="space-y-6">
-            
-            {error && (
-              <div className="p-3 flex items-center gap-2 text-sm text-red-400 bg-red-900/20 border border-red-900/50 rounded-md">
-                <AlertCircle size={16} />
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="p-3 flex items-center gap-2 text-sm text-emerald-400 bg-emerald-900/20 border border-emerald-900/50 rounded-md">
-                <CheckCircle size={16} />
-                {success}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Email</label>
-              <input
-                type="email"
-                required
-                className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium text-gray-300">Password</label>
-                <Link href="/users/forgotpassword" className="text-xs text-gray-500 hover:text-white transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-              <input
-                type="password"
-                required
-                className="w-full bg-[#111] border border-[#333] rounded-lg px-4 py-2.5 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg font-medium transition-all"
-            >
-              {loading ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <>
-                  Sign In <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-sm text-gray-500">
+    <AuthLayout
+      title="Sign in"
+      subtitle="Continue to your projects and analyses."
+      footer={
+        <>
           Don&apos;t have an account?{' '}
-          {/* Linked to /register to match the file created previously */}
-          <Link href="/users/signup" className="text-white hover:underline">
-            Sign up
+          <Link href="/users/signup" className="text-accent hover:underline underline-offset-2">
+            Create one
           </Link>
-        </p>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <FormError>{error}</FormError>
+        <FormSuccess>{success}</FormSuccess>
+
+        <Input
+          label="Email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <div>
+          <div className="flex justify-between items-baseline mb-1.5">
+            <label htmlFor="signin-password" className="text-[13px] font-medium text-ink-2">
+              Password
+            </label>
+            <Link
+              href="/users/forgotpassword"
+              className="text-[12px] text-ink-3 hover:text-ink transition-colors duration-150"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <Input
+            id="signin-password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <Button type="submit" variant="primary" loading={loading} className="w-full mt-1">
+          Sign in
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }
 
 export default function Login() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-surface flex items-center justify-center text-ink-3 text-sm">
+          Loading…
+        </div>
+      }
+    >
       <SignInForm />
     </Suspense>
   );
