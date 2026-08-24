@@ -1,8 +1,16 @@
 import prisma from "../config/prisma.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
 import { generateToken } from "../utility/jwt.js";
 import { sendEmail } from "../services/nodemailer.js";
+import {
+  savePendingSignup,
+  getPendingSignup,
+  recordFailedAttempt,
+  clearPendingSignup,
+  MAX_ATTEMPTS,
+} from "../services/pendingSignup.service.js";
 import {
   ACCESS_TOKEN_TTL,
   REFRESH_TOKEN_TTL,
@@ -10,6 +18,10 @@ import {
   refreshCookieOptions,
   clearCookieOptions,
 } from "../utility/cookies.js";
+
+// crypto.randomInt is a CSPRNG; Math.random() (used elsewhere in this file for
+// the password-reset OTP) is not, and there's no reason to guess weaker here.
+const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
 
 // Every user query that reaches a response body uses this allow-list. Never
 // return a bare findUnique: the row carries the password hash, the refresh
@@ -49,6 +61,9 @@ const issueSession = async (req, res, user) => {
   return accessToken;
 };
 
+// Sends the OTP but does not touch Postgres. The account is only created once
+// VerifySignupOtp confirms the code, so an abandoned or mistyped signup never
+// leaves a half-created user behind and never blocks the email for a retry.
 export const SignUp = async (req, res) => {
   try {
     const { name, email, bio, password } = req.body;
@@ -56,7 +71,6 @@ export const SignUp = async (req, res) => {
     if (!(name && email && bio && password)) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
 
     const [existingUser, hashedPassword] = await Promise.all([
       prisma.User.findUnique({ where: { email } }),
@@ -67,14 +81,109 @@ export const SignUp = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const user = await prisma.User.create({
-      data: { name, email, bio, password: hashedPassword },
-      select: { id: true, name: true, email: true, bio: true, createdAt: true },
-    });
+    const otp = generateOtp();
+    await savePendingSignup(email, { name, bio, hashedPassword, otp });
 
-    return res.status(201).json({ message: "User created successfully", user });
+    sendEmail(
+      email,
+      "Verify your email — CodeWise",
+      `Your CodeWise verification code is ${otp}. It expires in 10 minutes.`
+    ).catch((err) => console.error('Failed to send signup verification email:', err));
+
+    return res.status(200).json({
+      message: "We sent a verification code to your email.",
+      email,
+    });
   } catch (err) {
     console.error("Signup Error:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const VerifySignupOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!(email && otp)) {
+      return res.status(400).json({ error: "Email and code are required" });
+    }
+
+    const pending = await getPendingSignup(email);
+    if (!pending) {
+      return res.status(400).json({
+        error: "That code has expired or was never issued. Please sign up again.",
+      });
+    }
+
+    if (pending.otp !== otp) {
+      const { locked } = await recordFailedAttempt(email, pending);
+      if (locked) {
+        return res.status(429).json({
+          error: `Too many incorrect attempts (max ${MAX_ATTEMPTS}). Please sign up again.`,
+        });
+      }
+      return res.status(400).json({ error: "Incorrect code." });
+    }
+
+    // Email is unique on the User table: guard against a duplicate signup
+    // racing this one to completion while the OTP was outstanding.
+    const alreadyExists = await prisma.User.findUnique({ where: { email } });
+    if (alreadyExists) {
+      await clearPendingSignup(email);
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const user = await prisma.User.create({
+      data: {
+        name: pending.name,
+        email,
+        bio: pending.bio,
+        password: pending.hashedPassword,
+      },
+      select: { id: true, name: true, email: true, bio: true, role: true, createdAt: true },
+    });
+
+    await clearPendingSignup(email);
+
+    const accessToken = await issueSession(req, res, user);
+
+    return res.status(201).json({
+      message: "Account created successfully",
+      user,
+      accessToken,
+    });
+  } catch (err) {
+    console.error("Verify Signup OTP Error:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const ResendSignupOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const pending = await getPendingSignup(email);
+    if (!pending) {
+      return res.status(400).json({
+        error: "No pending signup found for this email. Please sign up again.",
+      });
+    }
+
+    const otp = generateOtp();
+    await savePendingSignup(email, { ...pending, otp });
+
+    sendEmail(
+      email,
+      "Your new CodeWise verification code",
+      `Your CodeWise verification code is ${otp}. It expires in 10 minutes.`
+    ).catch((err) => console.error('Failed to send resent verification email:', err));
+
+    return res.status(200).json({ message: "We sent a new verification code to your email." });
+  } catch (err) {
+    console.error("Resend Signup OTP Error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

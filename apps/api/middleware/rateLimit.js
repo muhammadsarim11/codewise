@@ -12,6 +12,28 @@ export const LoginRateLimiter = rateLimit({
 })
 
 
+export const signupRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 signup/OTP-send attempts per windowMs
+    message: {
+        success: false,
+        error: 'Too many signup attempts from this IP, please try again after 15 minutes'},
+            standardHeaders: true,
+    legacyHeaders: false,
+})
+
+
+export const verifyOtpRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 15, // a handful of mistyped codes should not lock someone out
+    message: {
+        success: false,
+        error: 'Too many verification attempts from this IP, please try again after 15 minutes'},
+            standardHeaders: true,
+    legacyHeaders: false,
+})
+
+
 export const forgotPasswordRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // limit each IP to 5 requests per windowMs
