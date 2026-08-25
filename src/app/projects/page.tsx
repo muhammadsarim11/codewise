@@ -238,7 +238,7 @@ export default function ProjectsView() {
 
   const handleAnalyzeNew = () => {
     if (selectedProject) {
-      window.location.href = `/?projectId=${selectedProject.id}`;
+      window.location.href = `/dashboard?projectId=${selectedProject.id}`;
     }
   };
 
