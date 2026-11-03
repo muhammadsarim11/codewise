@@ -94,7 +94,7 @@ Most tools only *format* or *lint* code.
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/codewise.git
+git clone https://github.com/muhammadsarim11/codewise.git
 cd codewise
 ```
 
