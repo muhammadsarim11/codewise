@@ -1,9 +1,22 @@
+# dependencies
 node_modules
-.env
+
+# env
+.env*
+!.env.example
+
+# build output
 .next
 dist
+out
+
+# turborepo / logs
+.turbo
+*.log
+
+# generated
+generated/
+
+# os / editor
 .DS_Store
-
-/generated/prisma
-
 .claude/
